@@ -11,15 +11,13 @@ using namespace std;
 
 
 void trajectory::extend_euler(const Cube& cube){  //Euler
-  coord3d nextposition(positions[positions.size()-1]+directions[directions.size()-1].normalised()*step_length);
-  if (cube.outofbounds(nextposition)) {return;}
-  append(nextposition,cube.getvector(nextposition));  
-  }
+  const coord3d nextposition(positions[positions.size()-1]+directions[directions.size()-1].normalised()*step_length);
+  if (! cube.outofbounds(nextposition))
+    append(nextposition,cube.getvector(nextposition));
+}
 
 
-
-
-void trajectory::extend_rungekutta(const Cube& cube){ 
+void trajectory::extend_rungekutta(const Cube& cube){
   coord3d c1 = positions[positions.size()-1];
   coord3d k1 = cube.getvector(c1);
   k1 = k1.normalised()*step_length;
@@ -34,29 +32,30 @@ void trajectory::extend_rungekutta(const Cube& cube){
   coord3d k4 = v3.normalised()*step_length;
   coord3d nextposition(positions[positions.size()-1]+(k1+k2*2.0+k3*2.0+k4)/6.0);
   coord3d c5 = cube.getvector(nextposition);
-  append(nextposition,c5);  
+  append(nextposition,c5);
 }
 
-void trajectory::printstatus(const Cube& cube){
-
-} 
 
 void trajectory::complete(const Cube& cube){
   //const double threshold = 1e-2;
-  //if (directions[0].norm() < threshold) {oob=true; return;} //if the intensity is vero low, don't bother completing. classify as "oob"
-  step_length=cube.spacing[0]*0.05;
+  //if (directions[0].norm() < threshold) {out_of_bounds=true; return;} //if the intensity is vero low, don't bother completing. classify as "oob"
+
+  const double step_length_ratio = 0.05;
+  step_length = step_length_ratio * cube.get_spacing()[0];
 
   int step = 0;
   double dist2farthest = -1; //if this is set at 0 at declaration, the following while loop will never run
 
-  while ((positions[positions.size()-1]-positions[0]).norm()>0.2*dist2farthest){ //if we get to a point that is less than SOME WELL-GUESSED FRACTION (1/5) of the longest distance in the trajectory
+  const double return_ratio = 0.2;
+  //if we get to a point that is less than SOME WELL-GUESSED FRACTION (1/5) of the longest distance in the trajectory
+  while ((positions[positions.size()-1]-positions[0]).norm() > return_ratio*dist2farthest){
     extend_rungekutta(cube);
     step++;
     if (cube.outofbounds(positions[positions.size()-1]+directions[directions.size()-1].normalised()*step_length)){
-      oob = true;
+      out_of_bounds = true;
       return;
     }
-  
+
     if ((positions[positions.size()-1]-positions[0]).norm()>dist2farthest) {
       dist2farthest=(positions[positions.size()-1]-positions[0]).norm();
     }
@@ -73,10 +72,10 @@ void trajectory::complete(const Cube& cube){
     }
   }
 }
-      
 
 
-int trajectory::classify(const Cube& cube, int bfielddir) const { 
+
+int trajectory::classify(const Cube& cube, int bfielddir) const {
   coord3d bfield;
   switch(bfielddir) {
     case 0:
@@ -115,33 +114,32 @@ int trajectory::classify(const Cube& cube, int bfielddir) const {
       return 7;
       }
   }
-  
+
+
+  if (out_of_bounds==true) {return 0;}
+
   coord3d crossum(0,0,0);
-
-  if (oob==true) {return 0;}
-
   for (int i = 1; i<directions.size(); i++){
-    crossum+=positions[i-1].cross(positions[i]);
+    crossum += positions[i-1].cross(positions[i]);
   }
-  crossum+=positions[positions.size()-1].cross(positions[0]);
+  crossum += positions[positions.size()-1].cross(positions[0]);
 
-  if (bfield.dot(crossum) < 0) { //counter-clockwise (paratropic) 
+  if (bfield.dot(crossum) < 0) { //counter-clockwise (paratropic)
     return -1;
   }
   else if (bfield.dot(crossum) > 0) { //clockwise (diatropic)
     return 1;
   }
-  else {                         //neither. something happened  // lnw: I suppose that never happens? // jaakko: i would also suppose that never happens, but in an _arbitary_ vector field such a trajectory could exist.
+  else {                         // neither.  should never happen
     return 2;
   }
-
 }
 
 void trajectory::write2mathematicalist(string filename) {
   ofstream outputfile;
   outputfile.open(filename);
   outputfile<<"traj = {{";
-  for (int i = 0; i<positions.size();i++) {    
+  for (int i = 0; i<positions.size();i++) {
     outputfile<<"{"<<positions[i][0]<<","<<positions[i][1]<<","<<positions[i][2]<<"}";
     if(i<positions.size()-1) {outputfile<<",";}
   }

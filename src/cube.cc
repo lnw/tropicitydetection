@@ -6,7 +6,7 @@
 #include <regex>
 #include <cmath>
 #include <unistd.h>
-#include <sys/stat.h>
+// #include <sys/stat.h>
 
 #include "geometry3.hh"
 #include "cube.hh"
@@ -15,7 +15,8 @@
 
 using namespace std;
 
-  
+
+// constructor, read from file
 Cube::Cube(string filename){
   vector <string> coordinates;
   regex redata("[0-9]E");
@@ -47,8 +48,8 @@ Cube::Cube(string filename){
     if (regex_search(vtiline, match, imagedata)) {
       istringstream iss(vtiline);
       vector<string> results ((istream_iterator<string>(iss)),istream_iterator<string>());
-      xrange = stoi(results[3])+1; 
-      yrange = stoi(results[5])+1; 
+      xrange = stoi(results[3])+1;
+      yrange = stoi(results[5])+1;
       zrange = stoi(results[7])+1;
       origin.push_back(stod(results[10]));
       origin.push_back(stod(results[11]));
@@ -61,14 +62,6 @@ Cube::Cube(string filename){
 }
 
 
-void Cube::writecube(const string& filename) const {
-  cout << "File-writing has not yet been implemented. " << filename << "\n";
-}
-
-
-void Cube::testfunc(){
-  cout<<"TESTING HARD\n";
-}
 bool Cube::outofbounds (coord3d position) const {
   if (position[0]>xrange || position[1]>yrange || position[2]>zrange || position[0]<0 || position[1]<0 || position[2]<0) {
     return true;
@@ -76,19 +69,20 @@ bool Cube::outofbounds (coord3d position) const {
   return false;
 }
 
-coord3d Cube::getvector(coord3d position) const{ //linear interpolation
+
+//linear interpolation
+coord3d Cube::getvector(coord3d position) const{
   if (outofbounds(position)) {
     return coord3d(7,7,7);
   }
   coord3d intpos((int)position[0],(int)position[1],(int)position[2]);
   coord3d sumvec(0,0,0);
   double normsum = 0;
-  double norm;
   for (int z=0; z<2; ++z) {
     for (int y=0; y<2; ++y) {
       for (int x=0; x<2; ++x) {
-        norm = (coord3d(intpos[0]+x,intpos[1]+y,intpos[2]+z)-position).norm();
-        if (norm < 1e-12) { // lnw: it doesn't matter too much here, but in general it's dangerous to test for the equality with a double (because floating point inaccuracies).  The normal solution is eps=..., if( abs(norm) < eps ), where epsilon is chosen appropriately
+        const double norm = (coord3d(intpos[0]+x,intpos[1]+y,intpos[2]+z)-position).norm();
+        if (norm < 1e-12) {
           return field[position[2]*xrange*yrange+position[1]*xrange+position[0]];
         }
         normsum += 1.0/norm;
@@ -100,9 +94,12 @@ coord3d Cube::getvector(coord3d position) const{ //linear interpolation
   return sumvec/normsum;
 }
 
-coord3d Cube::getvector3(coord3d position) const{ //skeleton function for tricubic interpolation
+
+ //skeleton function for tricubic interpolation
+coord3d Cube::getvector3(coord3d position) const{
   return coord3d(7,7,7);
 }
+
 
 vector<vector<int>> Cube::gettropplaneZ(double zcoord) const {
   vector<vector<int>>tropplaneZ;
@@ -120,6 +117,7 @@ vector<vector<int>> Cube::gettropplaneZ(double zcoord) const {
   }
   return tropplaneZ;
 }
+
 
 void Cube::splitgrid(string gridfile, string weightfile, int bfielddir) const{
 
@@ -144,7 +142,7 @@ void Cube::splitgrid(string gridfile, string weightfile, int bfielddir) const{
     istringstream gss(gridline);
     vector<string> gridresults((istream_iterator<string>(gss)),istream_iterator<string>());
     coord3d doublegridresults((stod(gridresults[0])-origin[0])/spacing[0],(stod(gridresults[1])-origin[1])/spacing[1],(stod(gridresults[2])-origin[2])/spacing[2]);
-    gridpoints.push_back(doublegridresults); 
+    gridpoints.push_back(doublegridresults);
     sridpoints.push_back(gridline);
   }
 
@@ -154,7 +152,7 @@ void Cube::splitgrid(string gridfile, string weightfile, int bfielddir) const{
   while (getline (weights, weightsline)) {
     istringstream wss(weightsline);
     vector<string> weightsresults((istream_iterator<string>(wss)),istream_iterator<string>());
-    gridweights.push_back(stod(weightsresults[0])); 
+    gridweights.push_back(stod(weightsresults[0]));
     sridweights.push_back(weightsline);
   }
 
@@ -218,7 +216,7 @@ void Cube::splitgrid(string gridfile, string weightfile, int bfielddir) const{
   parawoutfile << weightfile << "-paratropic";
   parawout.open(parawoutfile.str());
   for (int i=0;i<saraweights.size();i++) {
-    parawout<<saraweights[i]<<"\n";  
+    parawout<<saraweights[i]<<"\n";
   }
   parawout.close();
 
@@ -226,21 +224,21 @@ void Cube::splitgrid(string gridfile, string weightfile, int bfielddir) const{
   zeropoutfile << gridfile << "-zerotropic";
   zeropout.open(zeropoutfile.str());
   for (int i=0;i<seropoints.size();i++) {
-    zeropout<<seropoints[i]<<"\n";  
+    zeropout<<seropoints[i]<<"\n";
   }
   zeropout.close();
   ostringstream zerowoutfile;
   zerowoutfile << weightfile << "-zerotropic";
   zerowout.open(zerowoutfile.str());
   for (int i=0;i<seroweights.size();i++) {
-    zerowout<<seroweights[i]<<"\n";  
+    zerowout<<seroweights[i]<<"\n";
   }
   zerowout.close();
   zeroint.open("zerointensities.txt");
   for (int i=0;i<serointensities.size();i++){
     zeroint<<serointensities[i]<<"\n";
   }
-  
+
 }
 
 
@@ -259,7 +257,7 @@ vector<vector<int>> Cube::gettropplane(string filename, int bfielddir, int fixed
     }
   return tropplane;
   }
- 
+
   else if (fixeddir==1) {
     for (int z=0;z<zrange;z++) {
     vector<int> point_tropicity;
@@ -296,7 +294,6 @@ vector<vector<int>> Cube::gettropplane(string filename, int bfielddir, int fixed
 }
 
 
-
 void Cube::writetropplane(string filename, vector<vector<int>> tropicities) const{
   ofstream outputfile;
   outputfile.open(filename);
@@ -308,5 +305,9 @@ void Cube::writetropplane(string filename, vector<vector<int>> tropicities) cons
   }
   outputfile<<"}";
 }
- 
+
+
+void Cube::writecube(const string& filename) const {
+  cout << "File-writing has not yet been implemented. " << filename << "\n";
+}
 

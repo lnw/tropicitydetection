@@ -16,7 +16,7 @@ class trajectory {
   vector<coord3d> positions;
   vector<coord3d> directions;
   double step_length;
-  bool oob = false;  
+  bool out_of_bounds = false;
 
   public:
 
@@ -27,7 +27,7 @@ class trajectory {
   vector<coord3d> get_directions() const { return directions; }
   double get_step_length() const { return step_length; }
   double get_length() const { return positions.size(); }
-  
+
   void append(const coord3d &pos, const coord3d &dir){
     positions.push_back(pos);
     directions.push_back(dir);
@@ -48,7 +48,6 @@ class trajectory {
   int classify(const Cube& cube, int bfielddir) const;
 
   void write2mathematicalist(string filename);
-  void printstatus(const Cube& cube);
 
   bool to_mathematica(const trajectory &t, FILE *file);
 

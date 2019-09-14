@@ -25,7 +25,7 @@ template <typename S, typename T> ostream& operator<<(ostream& s, const pair<S,T
   return s; \
 }
 
-container_output(vector);
+container_output(vector)
 
 template <typename T>
 std::string to_string_with_precision(const T a_value, const int n = 3) {

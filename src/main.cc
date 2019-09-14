@@ -38,32 +38,32 @@ int main (int argc, char **argv) {
 
     try { double fixedcoord = stod(argv[5]); }
     catch(invalid_argument) { cout<<"The fixed coordinate '"<<argv[5]<<"' was not a double in desired format.\n"; errorsfound = true; }
-    
+
     try { int bfielddir = stoi(argv[3]); }
     catch(invalid_argument) { cout<<"The magnetic field direction '"<<argv[3]<<"' was not an integer in desired format.\n"; errorsfound = true; }
-    
+
     try { int fixedcoordaxis = stoi(argv[4]); }
     catch(invalid_argument) { cout<<"The coord axis '"<<argv[4]<<"' was not an integer in desired format.\n"; errorsfound = true; }
-    
+
     if (stoi(argv[3])<0 || stoi(argv[3])>5){
       cout<<"Expected magnetic field direction:\n\t0 for x, 1 for -x,\n\t2 for y, 3 for -y,\n\t4 for z, 5 for -z,\n";
       cout<<"Entered value was: "<<argv[3]<<"\n";
       errorsfound = true;
     }
-    
+
     if (stoi(argv[4])<0 || stoi(argv[4])>2) {
       cout<<"Expected coord axis:\n\t0 for x,\n\t1 for y,\n\t2 for z.\n";
       cout<<"Entered value was: "<<argv[4]<<"\n";
-      errorsfound = true;  
+      errorsfound = true;
     }
-    
+
     if (errorsfound) {
       cout<<"Run the program with only one parameter - the command name - for operation manual.\n";
       return 7;
     }
 //---------------above this line we're checking that the arguments are OK
-    
-    
+
+
     Cube cube(argv[2]);
     vector<vector<int>> tropplane = cube.gettropplane(argv[6], stoi(argv[3]), stoi(argv[4]), stod(argv[5]));
     cube.writetropplane(argv[6],tropplane);
@@ -79,7 +79,7 @@ int main (int argc, char **argv) {
       cout<<"Example: ./main splitgrid ../QZVPPDh2te-m06-2x.vti 4 ../grid4h2te ../weights4h2te\n";
       cout<<"The output will be 'gridfile-isotropic', 'weightfile-isotropic', etc...\n";
       return 7;
-    } 
+    }
 
     try {int bfielddir=stoi(argv[3]);}
     catch(invalid_argument) { cout<<"The magnetic field direction '"<<argv[3]<<"' couldn't be interpreted as an integer.\n"; return 7;}
@@ -96,7 +96,9 @@ int main (int argc, char **argv) {
   } else if (strcmp(command,"traj") == 0) { //this gets the trajectory at a given point and outputs it in a format that can be visualized in Mathematica
  //no command line argument error handling has been implemented yet, but one can pretty much copy-paste that from above
     Cube cube(argv[2]);
-    coord3d point((stod(argv[3])-cube.origin[0])/cube.spacing[0],(stod(argv[4])-cube.origin[1])/cube.spacing[1],(stod(argv[5])-cube.origin[2])/cube.spacing[2]);
+    const vector<double> origin(cube.get_origin());
+    const vector<double> spacing(cube.get_spacing());
+    coord3d point((stod(argv[3])-origin[0])/spacing[0],(stod(argv[4])-origin[1])/spacing[1],(stod(argv[5])-origin[2])/spacing[2]);
     trajectory traj(point, cube.getvector(point), 0.01);
     traj.complete(cube);
     traj.write2mathematicalist("traj.txt");

@@ -25,7 +25,7 @@ while (getline (vti, vtiline)) {
 		cout<<vtiline<<"\n";
 	}
 	else {
-		//cout << "NOMATCH:    " << vtiline; 
+		//cout << "NOMATCH:    " << vtiline;
 		cout<<vtiline<<"\n";
 	}
 }

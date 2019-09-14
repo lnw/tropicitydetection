@@ -1,7 +1,7 @@
 
 CXX=g++
 
-FLAGS=-O2 -Wshadow -Wunused -std=gnu++11 -fPIC
+FLAGS=-O2 -Wshadow -Wunused -Wpedantic -std=c++11 -fPIC
 PYTHON_INCLUDES_C=-I/usr/include/python3.7m
 
 HEADERS=geometry3.hh auxiliary.hh trajectory.hh cube.hh
