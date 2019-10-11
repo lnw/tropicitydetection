@@ -1,5 +1,5 @@
 # tropicitydetection
-Splitting .vti files to paratropic and isotropic parts.
+Splitting .vti files to paratropic and diatropic parts.
 # Usage
 Running 'main' without any arguments tells you which commands are available.
 Currently there are two commands properly implemented: 'splitgrid' and 'gettropplane'.

@@ -73,7 +73,7 @@ bool Cube::outofbounds (coord3d position) const {
 //linear interpolation
 coord3d Cube::getvector(coord3d position) const{
   if (outofbounds(position)) {
-    return coord3d(7,7,7);
+    return coord3d(7,7,7); //someone could write a list of these undocumented errorcodes?
   }
   coord3d intpos((int)position[0],(int)position[1],(int)position[2]);
   coord3d sumvec(0,0,0);
@@ -82,7 +82,7 @@ coord3d Cube::getvector(coord3d position) const{
     for (int y=0; y<2; ++y) {
       for (int x=0; x<2; ++x) {
         const double norm = (coord3d(intpos[0]+x,intpos[1]+y,intpos[2]+z)-position).norm();
-        if (norm < 1e-12) {
+        if (norm < 1e-12) { // magic number 1e-12: not checking form norm=0 because of floating point inaccuracy
           return field[position[2]*xrange*yrange+position[1]*xrange+position[0]];
         }
         normsum += 1.0/norm;
@@ -95,9 +95,11 @@ coord3d Cube::getvector(coord3d position) const{
 }
 
 
- //skeleton function for tricubic interpolation
+//skeleton function for tricubic interpolation later on we figured out that
+//it's probably more expensive to use tricubic interpolation than to make up
+//for the linear one by increasing grid resolution
 coord3d Cube::getvector3(coord3d position) const{
-  return coord3d(7,7,7);
+  return coord3d(7,7,7);	
 }
 
 
@@ -121,12 +123,11 @@ vector<vector<int>> Cube::gettropplaneZ(double zcoord) const {
 
 void Cube::splitgrid(string gridfile, string weightfile, int bfielddir) const{
 
-// lnw: could you define/explain what each of those are?
   vector<coord3d> gridpoints; //coordinates from the grid input file are read into this vector
   vector<double> gridweights; //weights from the weight input file are read into this vector
   vector<string> sridpoints; //coordinates from the grid input file are read into this vector
   vector<string> sridweights; //weights from the weight input file are read into this vector
-  vector<string> ssopoints;  //coordinates that were classified as isotropic are written into this vector
+  vector<string> ssopoints;  //coordinates that were classified as diatropic are written into this vector
   vector<string> ssoweights;  //and corresponding weights into this vector
   vector<string> sarapoints; //coordinates that were classified as paratropic are written into this vector
   vector<string> saraweights; //and corresponding weights into this vector
@@ -188,22 +189,22 @@ void Cube::splitgrid(string gridfile, string weightfile, int bfielddir) const{
 	//jaakko: this happens for example when the length of a vector is so close to zero that the length between to points is zero at double precision
     }
   }
-//now write iso, para and zero points and weights to respective files
-  ofstream isopout, isowout, parapout, parawout, zeropout, zerowout, zeroint;
-  ostringstream isopoutfile;
-  isopoutfile << gridfile << "-isotropic";
-  isopout.open(isopoutfile.str());
+//now write dia, para and zero points and weights to respective files
+  ofstream diapout, diawout, parapout, parawout, zeropout, zerowout, zeroint;
+  ostringstream diapoutfile;
+  diapoutfile << gridfile << "-diatropic";
+  diapout.open(diapoutfile.str());
   for (int i=0;i<ssopoints.size();i++) {
-    isopout<<ssopoints[i]<<"\n";
+    diapout<<ssopoints[i]<<"\n";
   }
-  isopout.close();
-  ostringstream isowoutfile;
-  isowoutfile << weightfile << "-isotropic";
-  isowout.open(isowoutfile.str());
+  diapout.close();
+  ostringstream diawoutfile;
+  diawoutfile << weightfile << "-diatropic";
+  diawout.open(diawoutfile.str());
   for (int i=0;i<ssoweights.size();i++) {
-    isowout<<ssoweights[i]<<"\n";
+    diawout<<ssoweights[i]<<"\n";
   }
-  isowout.close();
+  diawout.close();
 
   ostringstream parapoutfile;
   parapoutfile << gridfile << "-paratropic";
@@ -243,14 +244,17 @@ void Cube::splitgrid(string gridfile, string weightfile, int bfielddir) const{
 
 
 vector<vector<int>> Cube::gettropplane(string filename, int bfielddir, int fixeddir, double fixedcoord) const {
+  double steplength = 0.01;
   vector<vector<int>>tropplane;
-
   if (fixeddir==2) {
+  fixedcoord = (fixedcoord-origin[1])/spacing[1];
+  /// fixedcoord should probably be scaled (according to the .vti header (the gimic outputfile spacing)) at the very first line of this function!
     for (int y=0;y<yrange;y++) {
+    cout<<"y = "<<y<<"/"<<yrange<<endl;
     vector<int> point_tropicity;
     tropplane.push_back(point_tropicity);
       for (int x=0;x<xrange;x++){
-        trajectory traj(coord3d(x,y,fixedcoord),getvector(coord3d(x,y,fixedcoord)),0.01);
+        trajectory traj(coord3d(x,y,fixedcoord),getvector(coord3d(x,y,fixedcoord)),steplength);
         traj.complete(*this);
         tropplane[y].push_back(traj.classify(*this, bfielddir));
       }
@@ -260,11 +264,11 @@ vector<vector<int>> Cube::gettropplane(string filename, int bfielddir, int fixed
 
   else if (fixeddir==1) {
     for (int z=0;z<zrange;z++) {
+    cout<<"z = "<<z<<"/"<<zrange<<endl;
     vector<int> point_tropicity;
     tropplane.push_back(point_tropicity);
       for (int x=0;x<xrange;x++){
-        trajectory traj(coord3d(x,fixedcoord,z),getvector(coord3d(x,fixedcoord,z)),0.01);
-        cout<<"\nNEW TRAJECTORY CREATED AT\t"<<x<<","<<fixedcoord<<","<<z<<"\n";
+        trajectory traj(coord3d(x,fixedcoord,z),getvector(coord3d(x,fixedcoord,z)),steplength);
         traj.complete(*this);
         tropplane[z].push_back(traj.classify(*this, bfielddir));
       }
@@ -274,11 +278,11 @@ vector<vector<int>> Cube::gettropplane(string filename, int bfielddir, int fixed
 
   else if (fixeddir==0) {
     for (int y=0;y<yrange;y++) {
+    cout<<"y = "<<y<<"/"<<yrange<<endl;
     vector<int> point_tropicity;
     tropplane.push_back(point_tropicity);
       for (int z=0;z<zrange;z++){
-        trajectory traj(coord3d(fixedcoord,y,z),getvector(coord3d(fixedcoord,y,z)),0.01);
-        cout<<"\nNEW TRAJECTORY CREATED AT\t"<<fixedcoord<<","<<y<<","<<z<<"\n";
+        trajectory traj(coord3d(fixedcoord,y,z),getvector(coord3d(fixedcoord,y,z)),steplength);
         traj.complete(*this);
         tropplane[y].push_back(traj.classify(*this, bfielddir));
       }
@@ -310,4 +314,5 @@ void Cube::writetropplane(string filename, vector<vector<int>> tropicities) cons
 void Cube::writecube(const string& filename) const {
   cout << "File-writing has not yet been implemented. " << filename << "\n";
 }
+
 

@@ -17,6 +17,9 @@ void trajectory::extend_euler(const Cube& cube){  //Euler
 }
 
 
+// the numbers in extend-rungekutta are not magic numbers. (see wikipedia article for runge-kutta method).
+// any other numbers (like "10000" or "0.05" are probably magic numbers.
+// beware
 void trajectory::extend_rungekutta(const Cube& cube){
   coord3d c1 = positions[positions.size()-1];
   coord3d k1 = cube.getvector(c1);
@@ -39,7 +42,8 @@ void trajectory::extend_rungekutta(const Cube& cube){
 void trajectory::complete(const Cube& cube){
   //const double threshold = 1e-2;
   //if (directions[0].norm() < threshold) {out_of_bounds=true; return;} //if the intensity is vero low, don't bother completing. classify as "oob"
-
+  //the above is commented out because i didn't figure out what would be a good value for this threshold
+  //if someone does, this would probably save some computational time
   const double step_length_ratio = 0.05;
   step_length = step_length_ratio * cube.get_spacing()[0];
 
@@ -49,6 +53,7 @@ void trajectory::complete(const Cube& cube){
   const double return_ratio = 0.2;
   //if we get to a point that is less than SOME WELL-GUESSED FRACTION (1/5) of the longest distance in the trajectory
   while ((positions[positions.size()-1]-positions[0]).norm() > return_ratio*dist2farthest){
+    // (looking back on this this cant be very effective... maybe the next summer worker can come up with a computationally cheaper alternative)
     extend_rungekutta(cube);
     step++;
     if (cube.outofbounds(positions[positions.size()-1]+directions[directions.size()-1].normalised()*step_length)){
@@ -64,8 +69,8 @@ void trajectory::complete(const Cube& cube){
       step=0;
       step_length+=2;
       int size = positions.size();
-      for (int a=0;a<size-1;a++){
-        positions.pop_back();
+      for (int a=0;a<size-1;a++){ //also this can't be very effective, there must be a way to wipe the positions and directions lists and create new blanks ones that is cheaper than this
+        positions.pop_back();     
         directions.pop_back();
       }
       dist2farthest = -1;
