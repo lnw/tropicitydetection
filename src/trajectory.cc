@@ -41,7 +41,7 @@ void trajectory::extend_rungekutta(const Cube& cube){
 
 void trajectory::complete(const Cube& cube){
   //const double threshold = 1e-2;
-  //if (directions[0].norm() < threshold) {out_of_bounds=true; return;} //if the intensity is vero low, don't bother completing. classify as "oob"
+  //if (directions[0].norm() < threshold) {out_of_bounds=true; return;} //if the intensity is vero low, don't bother completing. classify as "out_of_bounds"
   //the above is commented out because i didn't figure out what would be a good value for this threshold
   //if someone does, this would probably save some computational time
   const double step_length_ratio = 0.05;
@@ -120,7 +120,6 @@ int trajectory::classify(const Cube& cube, int bfielddir) const {
       }
   }
 
-
   if (out_of_bounds==true) {return 0;}
 
   coord3d crossum(0,0,0);
@@ -129,13 +128,13 @@ int trajectory::classify(const Cube& cube, int bfielddir) const {
   }
   crossum += positions[positions.size()-1].cross(positions[0]);
 
-  if (bfield.dot(crossum) < 0) { //counter-clockwise (paratropic)
+  if (bfield.dot(crossum) > 0) { //counter-clockwise (paratropic) 
     return -1;
   }
-  else if (bfield.dot(crossum) > 0) { //clockwise (diatropic)
+  else if (bfield.dot(crossum) < 0) { //clockwise (diatropic)
     return 1;
   }
-  else {                         // neither.  should never happen
+  else { // invalid
     return 2;
   }
 }
