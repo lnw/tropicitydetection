@@ -120,20 +120,15 @@ TROPICITY trajectory::classify(const Cube& cube, int bfielddir) const {
       }
   }
 
-  if (out_of_bounds) {
-cout << "oob" << endl;
-return OUTOFBOUNDS;
-}
+  if (out_of_bounds) return OUTOFBOUNDS;
 
   coord3d crossum(0,0,0);
   for (int i = 1; i<directions.size(); i++){
     crossum += positions[i-1].cross(positions[i]);
   }
   crossum += positions[positions.size()-1].cross(positions[0]);
-cout << crossum << endl;
 
   const double dot_product = bfield.dot(crossum);
-cout << dot_product << endl;
   if (dot_product > 0) { // counter-clockwise (paratropic) 
     return PARATROPIC;
   }

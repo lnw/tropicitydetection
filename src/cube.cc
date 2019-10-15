@@ -168,7 +168,6 @@ void Cube::splitgrid(string gridfile, string weightfile, int bfielddir) const{
         //cout<<"\nNEW TRAJECTORY CREATED AT\t"<<gridpoints[i]<<"\n";
     traj.complete(*this);
     const TROPICITY classification = traj.classify(*this, bfielddir);
-cout << classification << endl;
     assert(classification != INPUT_ERROR);
     if (classification == DIATROPIC){
       dia_points.push_back(gridpoints_str[i]);
