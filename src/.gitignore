@@ -1,5 +1,6 @@
 
 build/*o
+*o
 main
 libtropicity.so
 *txt
