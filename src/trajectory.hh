@@ -9,8 +9,10 @@
 #include "auxiliary.hh"
 #include "geometry3.hh"
 #include "cube.hh"
+#include "trop-enum.hh"
 
 using namespace std;
+
 
 class trajectory {
   vector<coord3d> positions;
@@ -45,7 +47,7 @@ class trajectory {
   // extend trajectory until some criterion is met
   void complete(const Cube& cube);
   // return -1 or +1 for B dot (\sum r_i cross (p_i+1 - p_i)) less/greater zero
-  int classify(const Cube& cube, int bfielddir) const;
+  TROPICITY classify(const Cube& cube, int bfielddir) const;
 
   void write2mathematicalist(string filename);
 

@@ -68,7 +68,7 @@ int main (int argc, char **argv) {
 
 
     Cube cube(argv[2]);
-    vector<vector<int>> tropplane = cube.gettropplane(argv[6], stoi(argv[3]), stoi(argv[4]), stod(argv[5]));
+    vector<vector<TROPICITY>> tropplane = cube.gettropplane(argv[6], stoi(argv[3]), stoi(argv[4]), stod(argv[5]));
     cube.writetropplane(argv[6],tropplane);
     return 0;
   } else if (strcmp(command,"splitgrid") == 0) {  //run gridsplitter

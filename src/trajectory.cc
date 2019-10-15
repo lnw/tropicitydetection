@@ -21,20 +21,20 @@ void trajectory::extend_euler(const Cube& cube){  //Euler
 // any other numbers (like "10000" or "0.05" are probably magic numbers.
 // beware
 void trajectory::extend_rungekutta(const Cube& cube){
-  coord3d c1 = positions[positions.size()-1];
+  const coord3d c1 = positions[positions.size()-1];
   coord3d k1 = cube.getvector(c1);
   k1 = k1.normalised()*step_length;
-  coord3d c2 = positions[positions.size()-1]+k1*0.5;
-  coord3d v1 = cube.getvector(c2);
-  coord3d k2 = v1.normalised()*step_length;
-  coord3d c3 = positions[positions.size()-1]+k2*0.5;
-  coord3d v2 = cube.getvector(c3);
-  coord3d k3 = v2.normalised()*step_length;
-  coord3d c4 = positions[positions.size()-1]+k3;
-  coord3d v3 = cube.getvector(c4);
-  coord3d k4 = v3.normalised()*step_length;
-  coord3d nextposition(positions[positions.size()-1]+(k1+k2*2.0+k3*2.0+k4)/6.0);
-  coord3d c5 = cube.getvector(nextposition);
+  const coord3d c2 = positions[positions.size()-1]+k1*0.5;
+  const coord3d v1 = cube.getvector(c2);
+  const coord3d k2 = v1.normalised()*step_length;
+  const coord3d c3 = positions[positions.size()-1]+k2*0.5;
+  const coord3d v2 = cube.getvector(c3);
+  const coord3d k3 = v2.normalised()*step_length;
+  const coord3d c4 = positions[positions.size()-1]+k3;
+  const coord3d v3 = cube.getvector(c4);
+  const coord3d k4 = v3.normalised()*step_length;
+  const coord3d nextposition(positions[positions.size()-1]+(k1+k2*2.0+k3*2.0+k4)/6.0);
+  const coord3d c5 = cube.getvector(nextposition);
   append(nextposition,c5);
 }
 
@@ -65,7 +65,7 @@ void trajectory::complete(const Cube& cube){
       dist2farthest=(positions[positions.size()-1]-positions[0]).norm();
     }
 
-    if (step>10000){ //a single trajectory must not be more than this WELL-GUESSED NUMBER 10 000 OF steps
+    if (step>10000){ //a single trajectory must not be more than this WELL-GUESSED number 10 000 of steps
       step=0;
       step_length+=2;
       int size = positions.size();
@@ -80,7 +80,7 @@ void trajectory::complete(const Cube& cube){
 
 
 
-int trajectory::classify(const Cube& cube, int bfielddir) const {
+TROPICITY trajectory::classify(const Cube& cube, int bfielddir) const {
   coord3d bfield;
   switch(bfielddir) {
     case 0:
@@ -115,29 +115,36 @@ int trajectory::classify(const Cube& cube, int bfielddir) const {
       }
     default:
       {
-      cout<<"bfielddir value wasn't 0-5.\n";
-      return 7;
+      cerr<<"bfielddir value wasn't 0-5.\n";
+      return INPUT_ERROR;
       }
   }
 
-  if (out_of_bounds==true) {return 0;}
+  if (out_of_bounds) {
+cout << "oob" << endl;
+return OUTOFBOUNDS;
+}
 
   coord3d crossum(0,0,0);
   for (int i = 1; i<directions.size(); i++){
     crossum += positions[i-1].cross(positions[i]);
   }
   crossum += positions[positions.size()-1].cross(positions[0]);
+cout << crossum << endl;
 
-  if (bfield.dot(crossum) > 0) { //counter-clockwise (paratropic) 
-    return -1;
+  const double dot_product = bfield.dot(crossum);
+cout << dot_product << endl;
+  if (dot_product > 0) { // counter-clockwise (paratropic) 
+    return PARATROPIC;
   }
-  else if (bfield.dot(crossum) < 0) { //clockwise (diatropic)
-    return 1;
+  else if (dot_product < 0) { //clockwise (diatropic)
+    return DIATROPIC;
   }
   else { // invalid
-    return 2;
+    return UNCLASSIFYABLE;
   }
 }
+
 
 void trajectory::write2mathematicalist(string filename) {
   ofstream outputfile;
