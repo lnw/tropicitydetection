@@ -8,7 +8,6 @@
 #include <sstream>
 #include <cstring>
 #include <vector>
-#include <regex>
 
 #include "auxiliary.hh"
 

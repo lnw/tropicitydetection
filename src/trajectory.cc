@@ -80,7 +80,7 @@ void trajectory::complete(const Cube& cube){
 
 
 
-TROPICITY trajectory::classify(const Cube& cube, int bfielddir) const {
+Tropicity trajectory::classify(const Cube& cube, int bfielddir) const {
   coord3d bfield;
   switch(bfielddir) {
     case 0:
@@ -116,11 +116,11 @@ TROPICITY trajectory::classify(const Cube& cube, int bfielddir) const {
     default:
       {
       cerr<<"bfielddir value wasn't 0-5.\n";
-      return INPUT_ERROR;
+      return Tropicity::input_error;
       }
   }
 
-  if (out_of_bounds) return OUTOFBOUNDS;
+  if (out_of_bounds) return Tropicity::outofbounds;
 
   coord3d crossum(0,0,0);
   for (int i = 1; i<directions.size(); i++){
@@ -130,13 +130,13 @@ TROPICITY trajectory::classify(const Cube& cube, int bfielddir) const {
 
   const double dot_product = bfield.dot(crossum);
   if (dot_product > 0) { // counter-clockwise (paratropic) 
-    return PARATROPIC;
+    return Tropicity::paratropic;
   }
   else if (dot_product < 0) { //clockwise (diatropic)
-    return DIATROPIC;
+    return Tropicity::diatropic;
   }
   else { // invalid
-    return UNCLASSIFYABLE;
+    return Tropicity::unclassifyable;
   }
 }
 

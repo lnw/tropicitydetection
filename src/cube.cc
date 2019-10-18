@@ -103,10 +103,10 @@ coord3d Cube::getvector3(coord3d position) const{
 }
 
 
-vector<vector<TROPICITY>> Cube::gettropplaneZ(double zcoord) const {
-  vector<vector<TROPICITY>> tropplaneZ;
+vector<vector<Tropicity>> Cube::gettropplaneZ(double zcoord) const {
+  vector<vector<Tropicity>> tropplaneZ;
   for (int y=0;y<yrange;y++) {
-    vector<TROPICITY> point_tropicity;
+    vector<Tropicity> point_tropicity;
     tropplaneZ.push_back(point_tropicity);
     for (int x=0;x<xrange;x++){
       trajectory traj(coord3d(x,y,zcoord),getvector(coord3d(x,y,zcoord)),0.01);
@@ -114,8 +114,8 @@ vector<vector<TROPICITY>> Cube::gettropplaneZ(double zcoord) const {
       traj.complete(*this);
       const string filename = "new-" + to_string(x) + "-" + to_string(y) + "-" + to_string_with_precision(zcoord) + ".txt";
       traj.write2mathematicalist(filename);
-      const TROPICITY tr = traj.classify(*this, 4);
-      assert(tr != INPUT_ERROR);
+      const Tropicity tr = traj.classify(*this, 4);
+      assert(tr != Tropicity::input_error);
       tropplaneZ[y].push_back(tr);
     }
   }
@@ -167,21 +167,21 @@ void Cube::splitgrid(string gridfile, string weightfile, int bfielddir) const{
     if (i%100==0){cout<<"i="<<i<<"/"<<gridpoints.size()<<"\n";}
         //cout<<"\nNEW TRAJECTORY CREATED AT\t"<<gridpoints[i]<<"\n";
     traj.complete(*this);
-    const TROPICITY classification = traj.classify(*this, bfielddir);
-    assert(classification != INPUT_ERROR);
-    if (classification == DIATROPIC){
+    const Tropicity classification = traj.classify(*this, bfielddir);
+    assert(classification != Tropicity::input_error);
+    if (classification == Tropicity::diatropic){
       dia_points.push_back(gridpoints_str[i]);
       dia_weights.push_back(gridweights_str[i]);
-    } else if (classification == PARATROPIC){
+    } else if (classification == Tropicity::paratropic){
       para_points.push_back(gridpoints_str[i]);
       para_weights.push_back(gridweights_str[i]);
-    } else if (classification == OUTOFBOUNDS){
+    } else if (classification == Tropicity::outofbounds){
       zero_points.push_back(gridpoints_str[i]);
       zero_weights.push_back(gridweights_str[i]);
       ostringstream vectr;
       vectr<<to_string(getvector(gridpoints[i])[0])<<","<<to_string(getvector(gridpoints[i])[2])<<","<<to_string(getvector(gridpoints[i])[2]);
       zero_intensities.push_back(vectr.str());
-    } else if (classification == UNCLASSIFYABLE){
+    } else if (classification == Tropicity::unclassifyable){
       zero_points.push_back(gridpoints_str[i]);
       zero_weights.push_back(gridweights_str[i]);
       ostringstream vectr;
@@ -245,21 +245,21 @@ void Cube::splitgrid(string gridfile, string weightfile, int bfielddir) const{
 }
 
 
-vector<vector<TROPICITY>> Cube::gettropplane(string filename, int bfielddir, int fixeddir, double fixedcoord) const {
+vector<vector<Tropicity>> Cube::gettropplane(string filename, int bfielddir, int fixeddir, double fixedcoord) const {
   double steplength = 0.01;
-  vector<vector<TROPICITY>> tropplane;
+  vector<vector<Tropicity>> tropplane;
   if (fixeddir==2) {
   fixedcoord = (fixedcoord-origin[1])/spacing[1];
   /// fixedcoord should probably be scaled (according to the .vti header (the gimic outputfile spacing)) at the very first line of this function!
     for (int y=0;y<yrange;y++) {
     cout<<"y = "<<y<<"/"<<yrange<<endl;
-    vector<TROPICITY> point_tropicity;
+    vector<Tropicity> point_tropicity;
     tropplane.push_back(point_tropicity);
       for (int x=0;x<xrange;x++){
         trajectory traj(coord3d(x,y,fixedcoord),getvector(coord3d(x,y,fixedcoord)),steplength);
         traj.complete(*this);
-        const TROPICITY tr = traj.classify(*this, bfielddir);
-        assert(tr != INPUT_ERROR);
+        const Tropicity tr = traj.classify(*this, bfielddir);
+        assert(tr != Tropicity::input_error);
         tropplane[y].push_back(tr);
       }
     }
@@ -269,13 +269,13 @@ vector<vector<TROPICITY>> Cube::gettropplane(string filename, int bfielddir, int
   else if (fixeddir==1) {
     for (int z=0;z<zrange;z++) {
     cout<<"z = "<<z<<"/"<<zrange<<endl;
-    vector<TROPICITY> point_tropicity;
+    vector<Tropicity> point_tropicity;
     tropplane.push_back(point_tropicity);
       for (int x=0;x<xrange;x++){
         trajectory traj(coord3d(x,fixedcoord,z),getvector(coord3d(x,fixedcoord,z)),steplength);
         traj.complete(*this);
-        const TROPICITY tr = traj.classify(*this, bfielddir);
-        assert(tr != INPUT_ERROR);
+        const Tropicity tr = traj.classify(*this, bfielddir);
+        assert(tr != Tropicity::input_error);
         tropplane[z].push_back(tr);
       }
     }
@@ -285,13 +285,13 @@ vector<vector<TROPICITY>> Cube::gettropplane(string filename, int bfielddir, int
   else if (fixeddir==0) {
     for (int y=0;y<yrange;y++) {
     cout<<"y = "<<y<<"/"<<yrange<<endl;
-    vector<TROPICITY> point_tropicity;
+    vector<Tropicity> point_tropicity;
     tropplane.push_back(point_tropicity);
       for (int z=0;z<zrange;z++){
         trajectory traj(coord3d(fixedcoord,y,z),getvector(coord3d(fixedcoord,y,z)),steplength);
         traj.complete(*this);
-        const TROPICITY tr = traj.classify(*this, bfielddir);
-        assert(tr != INPUT_ERROR);
+        const Tropicity tr = traj.classify(*this, bfielddir);
+        assert(tr != Tropicity::input_error);
         tropplane[y].push_back(tr);
       }
     }
@@ -300,22 +300,22 @@ vector<vector<TROPICITY>> Cube::gettropplane(string filename, int bfielddir, int
 
   else {
     cout<<"FIXEDDIR was not 0-2.\n";
-    vector<vector<TROPICITY>> emptyvec;
+    vector<vector<Tropicity>> emptyvec;
     return emptyvec;
   }
 }
 
 
-void Cube::writetropplane(string filename, vector<vector<TROPICITY>> tropicities) const{
+void Cube::writetropplane(string filename, vector<vector<Tropicity>> tropicities) const{
   ofstream outputfile;
   outputfile.open(filename);
   outputfile<<"trop = {\n";
   for (int i=0;i<tropicities.size();i++){
-    outputfile<<tropicities[i];
-    if(i<tropicities.size()-1){outputfile<<",";}
-    outputfile<<"\n";
+    outputfile << as_integer(tropicities[i]);
+    if(i<tropicities.size()-1){outputfile << ",";}
+    outputfile << "\n";
   }
-  outputfile<<"}";
+  outputfile << "}";
 }
 
 

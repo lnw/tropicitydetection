@@ -68,7 +68,7 @@ int main (int argc, char **argv) {
 
 
     Cube cube(argv[2]);
-    vector<vector<TROPICITY>> tropplane = cube.gettropplane(argv[6], stoi(argv[3]), stoi(argv[4]), stod(argv[5]));
+    vector<vector<Tropicity>> tropplane = cube.gettropplane(argv[6], stoi(argv[3]), stoi(argv[4]), stod(argv[5]));
     cube.writetropplane(argv[6],tropplane);
     return 0;
   } else if (strcmp(command,"splitgrid") == 0) {  //run gridsplitter
@@ -106,7 +106,7 @@ int main (int argc, char **argv) {
     trajectory traj(point, cube.getvector(point), 0.01);
     traj.complete(cube);
     traj.write2mathematicalist("traj.txt");
-    cout<<"\nclassification: "<<traj.classify(cube, 4)<<"\n";
+    cout << "\nclassification: " << as_integer(traj.classify(cube, 4)) << "\n";
     return 0;
   } else {
     cout<<"Command not recognized. List of available commands:\n\tgettropplane\n\tsplitgrid\n";

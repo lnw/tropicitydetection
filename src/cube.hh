@@ -27,14 +27,14 @@ class Cube {
   vector<double> get_spacing() const {return spacing;}
   bool outofbounds (coord3d position) const;
 
-  vector<vector<TROPICITY>> gettropplaneZ(double zcoord) const;
-  vector<vector<TROPICITY>> gettropplane(string filename, int bfielddir, int fixeddir, double fixedcoord) const;
+  vector<vector<Tropicity>> gettropplaneZ(double zcoord) const;
+  vector<vector<Tropicity>> gettropplane(string filename, int bfielddir, int fixeddir, double fixedcoord) const;
   void splitgrid(string gridfile, string weightfile, int bfielddir) const;
 
   coord3d getvector(coord3d position) const;
   coord3d getvector3(coord3d position) const;
 
-  void writetropplane(string filename, vector<vector<TROPICITY>> tropicities) const;
+  void writetropplane(string filename, vector<vector<Tropicity>> tropicities) const;
   void writecube(const string& filename) const;
 };
 
