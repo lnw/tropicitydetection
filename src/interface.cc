@@ -19,11 +19,13 @@ PYBIND11_PLUGIN(libtropicity) {
 // class cube
   py::class_<Cube>(m, "cube")
     .def(py::init<string>())
-    .def("gettropplaneZ", &Cube::gettropplaneZ) // double
-    .def("writetropplaneZ", &Cube::writetropplaneZ) // string, vector<vector<int>>
+//    .def("gettropplaneZ", &Cube::gettropplaneZ) // double
+    .def("gettropplane", &Cube::gettropplane) // double
+//    .def("writetropplaneZ", &Cube::writetropplaneZ) // string, vector<vector<int>>
     .def("writecube", &Cube::writecube) // string
     .def("getvector", &Cube::getvector) // coord3d
-    .def("outofbounds", &Cube::outofbounds); //coord3d
+    .def("outofbounds", &Cube::outofbounds) //coord3d
+    .def("splitgrid", &Cube::splitgrid); //coord3d
 
 // class trajectory
   py::class_<trajectory>(m, "trajectory")
