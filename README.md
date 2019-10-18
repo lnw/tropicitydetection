@@ -13,3 +13,11 @@ The output can be visualized in Mathematica with the commands
 'Get["tropplanefile.txt"]'
 'ListDensityPlot[trop]'
 Example: ./main gettropplane ../QZVPPDh2te-m06-2x.vti 4 2 6.7 output.txt
+
+# installation
+
+mkdir build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=<DEBUG,RELEASE>
+make
+
