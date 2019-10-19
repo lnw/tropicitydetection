@@ -15,7 +15,7 @@ Example:
 
 ## 'gettropplane'
 'gettropplane' gets the tropicities of each point in a plane perpendicular to either the x, y or z axis.
-The output can be visualized in Mathematica with the commands
+The output can be visualised in Mathematica with the commands
 ```
 'Get["tropplanefile.txt"]'
 'ListDensityPlot[trop]'
@@ -29,7 +29,7 @@ Example:
 
 ## python interface
 
-There is a thin python interface to most of the functionality.  Two example scripts are located in bin; the usage is the following:
+There is a thin python interface to most of the functionality.  Two example scripts are located in `bin'; the usage is the following:
 
 ```
 python assign_plane.py --input QZVPPDh2te-m06-2x.vti --output output.txt --bfielddir 5 --perpdir 0 --perpcoord 0.0
@@ -44,5 +44,6 @@ mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=<DEBUG,RELEASE>
 make
+make install
 ```
 

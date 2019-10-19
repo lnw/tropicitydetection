@@ -6,6 +6,7 @@
 #include <fstream>
 
 #include "geometry3.hh"
+#include "trop-enum.hh"
 #include "trajectory.hh"
 #include "cube.hh"
 

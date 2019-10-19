@@ -10,19 +10,17 @@
 namespace py = pybind11;
 
 PYBIND11_PLUGIN(libtropicity) {
-  py::module m("lalala", "pybind11 ... whatever");
+  py::module mod("shortname", "there could be an explanation here");
 
 // enum class Tropicity
-  py::class_<Tropicity>(m, "Tropicity");
-    // .def(py::init<float, float, float>());
-
+  py::class_<Tropicity>(mod, "Tropicity");
 
 // class coord3d
-  py::class_<coord3d>(m, "coord3d")
+  py::class_<coord3d>(mod, "coord3d")
     .def(py::init<float, float, float>());
 
 // class cube
-  py::class_<Cube>(m, "cube")
+  py::class_<Cube>(mod, "cube")
     .def(py::init<string>())
     .def("gettropplane", &Cube::gettropplane) // int, int, double
     .def("writetropplane", &Cube::writetropplane) // string, vector<vector<TROP>>
@@ -32,11 +30,11 @@ PYBIND11_PLUGIN(libtropicity) {
     .def("splitgrid", &Cube::splitgrid); // string, string, int
 
 // class trajectory
-  py::class_<trajectory>(m, "trajectory")
+  py::class_<trajectory>(mod, "trajectory")
     .def(py::init<coord3d, coord3d, float>());
 
 
 
-    return m.ptr();
+    return mod.ptr();
 }
 
