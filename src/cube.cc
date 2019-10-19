@@ -6,11 +6,11 @@
 #include <regex>
 #include <cmath>
 #include <unistd.h>
-// #include <sys/stat.h>
 
 #include "geometry3.hh"
 #include "cube.hh"
 #include "trajectory.hh"
+#include "trop-enum.hh"
 
 
 using namespace std;
@@ -59,6 +59,16 @@ Cube::Cube(string filename){
       spacing.push_back(stod(results[17]));
     }
   }
+
+#if 1
+  // cout << "range: " << xrange << ", " << yrange << ", " << zrange << endl;
+  cout << "origin: " << origin << endl;
+  cout << "spacing: " << spacing << endl;
+  cout << "real space range: " << 0.0*spacing[0]+origin[0] << " -- " << (xrange-1)*spacing[0]+origin[0] << ",  " 
+                               << 0.0*spacing[1]+origin[1] << " -- " << (yrange-1)*spacing[1]+origin[1] << ",  "
+                               << 0.0*spacing[2]+origin[2] << " -- " << (zrange-1)*spacing[2]+origin[2] << endl;
+#endif
+
 }
 
 
@@ -162,7 +172,7 @@ void Cube::splitgrid(string gridfile, string weightfile, int bfielddir) const{
 //we now have the gridpoints in vector<coord3d> gridpoints and the corresponding weights in vector<double> gridweights
 //next: get tropicity at each point, then write out two gridfiles
 
-  for(int i=0;i<gridpoints.size();i++){
+  for(size_t i=0; i<gridpoints.size(); i++){
     trajectory traj(gridpoints[i],getvector(gridpoints[i]),0.01);
     if (i%100==0){cout<<"i="<<i<<"/"<<gridpoints.size()<<"\n";}
         //cout<<"\nNEW TRAJECTORY CREATED AT\t"<<gridpoints[i]<<"\n";
@@ -196,60 +206,66 @@ void Cube::splitgrid(string gridfile, string weightfile, int bfielddir) const{
   ostringstream diapoutfile;
   diapoutfile << gridfile << "-diatropic";
   diapout.open(diapoutfile.str());
-  for (int i=0;i<dia_points.size();i++) {
-    diapout<<dia_points[i]<<"\n";
+  for (auto dp: dia_points) {
+    diapout << dp << "\n";
   }
   diapout.close();
   ostringstream diawoutfile;
   diawoutfile << weightfile << "-diatropic";
   diawout.open(diawoutfile.str());
-  for (int i=0;i<dia_weights.size();i++) {
-    diawout<<dia_weights[i]<<"\n";
+  for (auto dw: dia_weights) {
+    diawout << dw << "\n";
   }
   diawout.close();
 
   ostringstream parapoutfile;
   parapoutfile << gridfile << "-paratropic";
   parapout.open(parapoutfile.str());
-  for (int i=0;i<para_points.size();i++) {
-    parapout<<para_points[i]<<"\n";
+  for (auto pp: para_points) {
+    parapout << pp << "\n";
   }
   parapout.close();
   ostringstream parawoutfile;
   parawoutfile << weightfile << "-paratropic";
   parawout.open(parawoutfile.str());
-  for (int i=0;i<para_weights.size();i++) {
-    parawout<<para_weights[i]<<"\n";
+  for (auto pw: para_weights) {
+    parawout << pw << "\n";
   }
   parawout.close();
 
   ostringstream zeropoutfile;
   zeropoutfile << gridfile << "-zerotropic";
   zeropout.open(zeropoutfile.str());
-  for (int i=0;i<zero_points.size();i++) {
-    zeropout<<zero_points[i]<<"\n";
+  for (auto zp: zero_points) {
+    zeropout << zp << "\n";
   }
   zeropout.close();
   ostringstream zerowoutfile;
   zerowoutfile << weightfile << "-zerotropic";
   zerowout.open(zerowoutfile.str());
-  for (int i=0;i<zero_weights.size();i++) {
-    zerowout<<zero_weights[i]<<"\n";
+  for (auto zw: zero_weights) {
+    zerowout << zw << "\n";
   }
   zerowout.close();
   zeroint.open("zerointensities.txt");
-  for (int i=0;i<zero_intensities.size();i++){
-    zeroint<<zero_intensities[i]<<"\n";
+  for (auto zi: zero_intensities){
+    zeroint << zi << "\n";
   }
 
 }
 
 
-vector<vector<Tropicity>> Cube::gettropplane(string filename, int bfielddir, int fixeddir, double fixedcoord) const {
+// assign the tropicity of points on a plane.  The plane is defined by the
+// direction perpendicular to it (fixeddir), and the offset with respect to
+// that coordinate (fixedcoord).  The plane covers the whole crosssection of
+// the cube.
+vector<vector<Tropicity>> Cube::gettropplane(int bfielddir, int fixeddir, double fixedcoord) const {
+  assert(bfielddir >= 0 && bfielddir <= 5);
+  assert(fixeddir >= 0 && fixeddir <= 2);
   double steplength = 0.01;
   vector<vector<Tropicity>> tropplane;
   if (fixeddir==2) {
-  fixedcoord = (fixedcoord-origin[1])/spacing[1];
+    fixedcoord = (fixedcoord-origin[2])/spacing[2];
   /// fixedcoord should probably be scaled (according to the .vti header (the gimic outputfile spacing)) at the very first line of this function!
     for (int y=0;y<yrange;y++) {
     cout<<"y = "<<y<<"/"<<yrange<<endl;
@@ -267,6 +283,7 @@ vector<vector<Tropicity>> Cube::gettropplane(string filename, int bfielddir, int
   }
 
   else if (fixeddir==1) {
+    fixedcoord = (fixedcoord-origin[1])/spacing[1];
     for (int z=0;z<zrange;z++) {
     cout<<"z = "<<z<<"/"<<zrange<<endl;
     vector<Tropicity> point_tropicity;
@@ -283,6 +300,7 @@ vector<vector<Tropicity>> Cube::gettropplane(string filename, int bfielddir, int
   }
 
   else if (fixeddir==0) {
+    fixedcoord = (fixedcoord-origin[0])/spacing[0];
     for (int y=0;y<yrange;y++) {
     cout<<"y = "<<y<<"/"<<yrange<<endl;
     vector<Tropicity> point_tropicity;
@@ -310,12 +328,12 @@ void Cube::writetropplane(string filename, vector<vector<Tropicity>> tropicities
   ofstream outputfile;
   outputfile.open(filename);
   outputfile<<"trop = {\n";
-  for (int i=0;i<tropicities.size();i++){
+  for (size_t i=0;i<tropicities.size();i++){
     outputfile << as_integer(tropicities[i]);
     if(i<tropicities.size()-1){outputfile << ",";}
     outputfile << "\n";
   }
-  outputfile << "}";
+  outputfile << "}" << endl;;
 }
 
 

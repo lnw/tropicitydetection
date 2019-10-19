@@ -4,11 +4,16 @@ project(tropicity)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
 
-find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+find_package(Python3 COMPONENTS Development REQUIRED)
 INCLUDE_DIRECTORIES(${Python3_INCLUDE_DIRS})
 
+SET(CMAKE_CXX_FLAGS "-fPIC")
 SET(CMAKE_CXX_FLAGS_RELEASE "-O3")
-SET(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -Wall -Wpedantic")
+SET(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -Wall -Wunused -Wpedantic")
 
+if(NOT DEFINED ${CMAKE_INSTALL_PREFIX})
+  SET(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR})
+endif()
 
 add_subdirectory(src)
+

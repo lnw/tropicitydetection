@@ -28,7 +28,7 @@ class Cube {
   bool outofbounds (coord3d position) const;
 
   vector<vector<Tropicity>> gettropplaneZ(double zcoord) const;
-  vector<vector<Tropicity>> gettropplane(string filename, int bfielddir, int fixeddir, double fixedcoord) const;
+  vector<vector<Tropicity>> gettropplane(int bfielddir, int fixeddir, double fixedcoord) const;
   void splitgrid(string gridfile, string weightfile, int bfielddir) const;
 
   coord3d getvector(coord3d position) const;

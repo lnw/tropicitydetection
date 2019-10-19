@@ -1,7 +1,7 @@
 #ifndef TROPENUM_HH
 #define TROPENUM_HH
 
-enum class Tropicity {diatropic, paratropic, outofbounds, unclassifyable, input_error};
+enum class Tropicity: unsigned short {diatropic=0, paratropic, outofbounds, unclassifyable, input_error};
 
 // print one Tropicity as an integer
 template <typename Enum>

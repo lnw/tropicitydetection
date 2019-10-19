@@ -123,21 +123,19 @@ Tropicity trajectory::classify(const Cube& cube, int bfielddir) const {
   if (out_of_bounds) return Tropicity::outofbounds;
 
   coord3d crossum(0,0,0);
-  for (int i = 1; i<directions.size(); i++){
-    crossum += positions[i-1].cross(positions[i]);
+  const size_t polygon_size(directions.size());
+  for (size_t i = 0; i<polygon_size; i++){
+    crossum += positions[(i-1+polygon_size)%polygon_size].cross(positions[i]);
   }
-  crossum += positions[positions.size()-1].cross(positions[0]);
+  // crossum += positions[positions.size()-1].cross(positions[0]);
 
   const double dot_product = bfield.dot(crossum);
-  if (dot_product > 0) { // counter-clockwise (paratropic) 
+  if (dot_product > 0) 
     return Tropicity::paratropic;
-  }
-  else if (dot_product < 0) { //clockwise (diatropic)
+  else if (dot_product < 0)
     return Tropicity::diatropic;
-  }
-  else { // invalid
+  else
     return Tropicity::unclassifyable;
-  }
 }
 
 
@@ -145,7 +143,7 @@ void trajectory::write2mathematicalist(string filename) {
   ofstream outputfile;
   outputfile.open(filename);
   outputfile<<"traj = {{";
-  for (int i = 0; i<positions.size();i++) {
+  for (size_t i = 0; i<positions.size();i++) {
     outputfile<<"{"<<positions[i][0]<<","<<positions[i][1]<<","<<positions[i][2]<<"}";
     if(i<positions.size()-1) {outputfile<<",";}
   }

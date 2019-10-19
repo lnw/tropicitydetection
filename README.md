@@ -27,6 +27,16 @@ Example:
 ```
 
 
+## python interface
+
+There is a thin python interface to most of the functionality.  Two example scripts are located in bin; the usage is the following:
+
+```
+python assign_plane.py --input QZVPPDh2te-m06-2x.vti --output output.txt --bfielddir 5 --perpdir 0 --perpcoord 0.0
+python splitgrid.py --input QZVPPDh2te-m06-2x.vti --bfielddir 5 --grid grid4h2te --weights weights4h2te
+```
+
+
 ## installation
 
 ```
