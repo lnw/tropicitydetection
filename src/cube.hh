@@ -1,10 +1,10 @@
 #ifndef CUBE_HH
 #define CUBE_HH
 
-#include <vector>
-#include <iostream>
-#include <fstream>
 #include <cmath>
+#include <fstream>
+#include <iostream>
+#include <vector>
 
 #include "geometry3.hh"
 #include "trop-enum.hh"
@@ -20,12 +20,12 @@ class Cube {
   vector<double> origin;
   vector<double> spacing;
 
-  public:
+public:
   Cube(string filename);
 
-  vector<double> get_origin() const {return origin;}
-  vector<double> get_spacing() const {return spacing;}
-  bool outofbounds (coord3d position) const;
+  vector<double> get_origin() const { return origin; }
+  vector<double> get_spacing() const { return spacing; }
+  bool outofbounds(coord3d position) const;
 
   vector<vector<Tropicity>> gettropplaneZ(double zcoord) const;
   vector<vector<Tropicity>> gettropplane(int bfielddir, int fixeddir, double fixedcoord) const;
