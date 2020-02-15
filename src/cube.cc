@@ -48,9 +48,9 @@ Cube::Cube(string filename) {
     if (regex_search(vtiline, match, imagedata)) {
       istringstream iss(vtiline);
       vector<string> results((istream_iterator<string>(iss)), istream_iterator<string>());
-      xrange = stoi(results[3]) + 1;
-      yrange = stoi(results[5]) + 1;
-      zrange = stoi(results[7]) + 1;
+      n_x = stoi(results[3]) + 1;
+      n_y = stoi(results[5]) + 1;
+      n_z = stoi(results[7]) + 1;
       origin.push_back(stod(results[10]));
       origin.push_back(stod(results[11]));
       origin.push_back(stod(results[12]));
@@ -61,18 +61,18 @@ Cube::Cube(string filename) {
   }
 
 #if 1
-  // cout << "range: " << xrange << ", " << yrange << ", " << zrange << endl;
+  // cout << "range: " << n_x << ", " << n_y << ", " << n_z << endl;
   cout << "origin: " << origin << endl;
   cout << "spacing: " << spacing << endl;
-  cout << "real space range: " << 0.0 * spacing[0] + origin[0] << " -- " << (xrange - 1) * spacing[0] + origin[0] << ",  "
-       << 0.0 * spacing[1] + origin[1] << " -- " << (yrange - 1) * spacing[1] + origin[1] << ",  "
-       << 0.0 * spacing[2] + origin[2] << " -- " << (zrange - 1) * spacing[2] + origin[2] << endl;
+  cout << "real space range: " << 0.0 * spacing[0] + origin[0] << " -- " << (n_x - 1) * spacing[0] + origin[0] << ",  "
+       << 0.0 * spacing[1] + origin[1] << " -- " << (n_y - 1) * spacing[1] + origin[1] << ",  "
+       << 0.0 * spacing[2] + origin[2] << " -- " << (n_z - 1) * spacing[2] + origin[2] << endl;
 #endif
 }
 
 
 bool Cube::outofbounds(coord3d position) const {
-  if (position[0] > xrange || position[1] > yrange || position[2] > zrange || position[0] < 0 || position[1] < 0 || position[2] < 0) {
+  if (position[0] > n_x || position[1] > n_y || position[2] > n_z || position[0] < 0 || position[1] < 0 || position[2] < 0) {
     return true;
   }
   return false;
@@ -84,6 +84,34 @@ optional<coord3d> Cube::getvector(coord3d position) const {
   if (outofbounds(position))
     return {};
 
+#if 1
+  // cout << position << endl;
+  int x = position[0];
+  int y = position[1];
+  int z = position[2];
+  int x0 = int(floor(position[0]));
+  int x1 = x0 + 1;
+  int y0 = int(floor(position[1]));
+  int y1 = y0 + 1;
+  int z0 = int(floor(position[2]));
+  int z1 = z0 + 1;
+  coord3d v000 = (*this)(z0, y0, x0);
+  coord3d v001 = (*this)(z0, y0, x1);
+  coord3d v010 = (*this)(z0, y1, x0);
+  coord3d v011 = (*this)(z0, y1, x1);
+  coord3d v100 = (*this)(z1, y0, x0);
+  coord3d v101 = (*this)(z1, y0, x1);
+  coord3d v110 = (*this)(z1, y1, x0);
+  coord3d v111 = (*this)(z1, y1, x1);
+  coord3d aux0 = (x1 - x) * v000 + (x - x0) * v001;
+  coord3d aux1 = (x1 - x) * v010 + (x - x0) * v011;
+  coord3d aux2 = (x1 - x) * v100 + (x - x0) * v101;
+  coord3d aux3 = (x1 - x) * v110 + (x - x0) * v111;
+  coord3d aux4 = (y1 - y) * aux0 + (y - y0) * aux1;
+  coord3d aux5 = (y1 - y) * aux2 + (y - y0) * aux3;
+  coord3d aux6 = (z1 - z) * aux4 + (z - z0) * aux5;
+  return aux6;
+#else
   coord3d intpos((int)position[0], (int)position[1], (int)position[2]);
   coord3d sumvec(0, 0, 0);
   double normsum = 0;
@@ -92,15 +120,15 @@ optional<coord3d> Cube::getvector(coord3d position) const {
       for (int x = 0; x < 2; ++x) {
         const double norm = (coord3d(intpos[0] + x, intpos[1] + y, intpos[2] + z) - position).norm();
         if (norm < 1e-12) { // magic number 1e-12: not checking form norm=0 because of floating point inaccuracy
-          return field[position[2] * xrange * yrange + position[1] * xrange + position[0]];
+          return (*this)(position[2], position[1], position[0]);
         }
         normsum += 1.0 / norm;
-        sumvec += field[(intpos[2] + z) * xrange * yrange + (intpos[1] + y) * xrange + intpos[0] + x] / norm;
+        sumvec += (*this)(intpos[2] + z, intpos[1] + y, intpos[0] + x) / norm;
       }
     }
   }
-
   return sumvec / normsum;
+#endif
 }
 
 
@@ -114,10 +142,10 @@ coord3d Cube::getvector3(coord3d position) const {
 
 vector<vector<Tropicity>> Cube::gettropplaneZ(double zcoord) const {
   vector<vector<Tropicity>> tropplaneZ;
-  for (int y = 0; y < yrange; y++) {
+  for (int y = 0; y < n_y; y++) {
     vector<Tropicity> point_tropicity;
     tropplaneZ.push_back(point_tropicity);
-    for (int x = 0; x < xrange; x++) {
+    for (int x = 0; x < n_x; x++) {
       auto optvect = getvector(coord3d(x, y, zcoord));
       assert(optvect);
       trajectory traj(coord3d(x, y, zcoord), optvect.value(), 0.01);
@@ -282,11 +310,11 @@ vector<vector<Tropicity>> Cube::gettropplane(int bfielddir, int fixeddir, double
   if (fixeddir == 2) {
     fixedcoord = (fixedcoord - origin[2]) / spacing[2];
     /// fixedcoord should probably be scaled (according to the .vti header (the gimic outputfile spacing)) at the very first line of this function!
-    for (int y = 0; y < yrange; y++) {
-      cout << "y = " << y << "/" << yrange << endl;
+    for (int y = 0; y < n_y; y++) {
+      cout << "y = " << y << "/" << n_y << endl;
       vector<Tropicity> point_tropicity;
       tropplane.push_back(point_tropicity);
-      for (int x = 0; x < xrange; x++) {
+      for (int x = 0; x < n_x; x++) {
         auto optvect = getvector(coord3d(x, y, fixedcoord));
         assert(optvect);
         trajectory traj(coord3d(x, y, fixedcoord), optvect.value(), steplength);
@@ -301,11 +329,11 @@ vector<vector<Tropicity>> Cube::gettropplane(int bfielddir, int fixeddir, double
 
   else if (fixeddir == 1) {
     fixedcoord = (fixedcoord - origin[1]) / spacing[1];
-    for (int z = 0; z < zrange; z++) {
-      cout << "z = " << z << "/" << zrange << endl;
+    for (int z = 0; z < n_z; z++) {
+      cout << "z = " << z << "/" << n_z << endl;
       vector<Tropicity> point_tropicity;
       tropplane.push_back(point_tropicity);
-      for (int x = 0; x < xrange; x++) {
+      for (int x = 0; x < n_x; x++) {
         auto optvect = getvector(coord3d(x, fixedcoord, z));
         assert(optvect);
         trajectory traj(coord3d(x, fixedcoord, z), optvect.value(), steplength);
@@ -320,11 +348,11 @@ vector<vector<Tropicity>> Cube::gettropplane(int bfielddir, int fixeddir, double
 
   else if (fixeddir == 0) {
     fixedcoord = (fixedcoord - origin[0]) / spacing[0];
-    for (int y = 0; y < yrange; y++) {
-      cout << "y = " << y << "/" << yrange << endl;
+    for (int y = 0; y < n_y; y++) {
+      cout << "y = " << y << "/" << n_y << endl;
       vector<Tropicity> point_tropicity;
       tropplane.push_back(point_tropicity);
-      for (int z = 0; z < zrange; z++) {
+      for (int z = 0; z < n_z; z++) {
         auto optvect = getvector(coord3d(fixedcoord, y, z));
         assert(optvect);
         trajectory traj(coord3d(fixedcoord, y, z), optvect.value(), steplength);

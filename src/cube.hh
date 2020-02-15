@@ -4,8 +4,8 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
-#include <vector>
 #include <optional>
+#include <vector>
 
 #include "geometry3.hh"
 #include "trop-enum.hh"
@@ -15,14 +15,21 @@ using namespace std;
 
 class Cube {
   vector<coord3d> field;
-  int xrange;
-  int yrange;
-  int zrange;
+  int n_x;
+  int n_y;
+  int n_z;
   vector<double> origin;
   vector<double> spacing;
 
 public:
   Cube(string filename);
+
+  const coord3d& operator()(const int z, const int y, const int x) const {
+    return field[n_x * n_y * z + n_x * y + x];
+  }
+  coord3d& operator()(const int z, const int y, const int x) {
+    return field[n_x * n_y * z + n_x * y + x];
+  }
 
   vector<double> get_origin() const { return origin; }
   vector<double> get_spacing() const { return spacing; }
