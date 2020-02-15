@@ -19,7 +19,7 @@ template <typename Enum>
 auto as_integer(const vector<Enum> values)
     -> vector<typename std::underlying_type<Enum>::type> {
   vector<typename std::underlying_type<Enum>::type> out;
-  for (auto value : values)
+  for (auto value: values)
     out.push_back(static_cast<typename std::underlying_type<Enum>::type>(value));
   return out;
 }

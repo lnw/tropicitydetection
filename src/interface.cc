@@ -25,7 +25,7 @@ PYBIND11_PLUGIN(libtropicity) {
       .def("gettropplane", &Cube::gettropplane)     // int, int, double
       .def("writetropplane", &Cube::writetropplane) // string, vector<vector<TROP>>
       .def("writecube", &Cube::writecube)           // string
-      .def("getvector", &Cube::getvector)           // coord3d
+      //.def("getvector", &Cube::getvector)           // coord3d
       .def("outofbounds", &Cube::outofbounds)       //
       .def("splitgrid", &Cube::splitgrid);          // string, string, int
 

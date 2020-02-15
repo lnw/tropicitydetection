@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <optional>
 
 #include "geometry3.hh"
 #include "trop-enum.hh"
@@ -31,7 +32,7 @@ public:
   vector<vector<Tropicity>> gettropplane(int bfielddir, int fixeddir, double fixedcoord) const;
   void splitgrid(string gridfile, string weightfile, int bfielddir) const;
 
-  coord3d getvector(coord3d position) const;
+  optional<coord3d> getvector(coord3d position) const;
   coord3d getvector3(coord3d position) const;
 
   void writetropplane(string filename, vector<vector<Tropicity>> tropicities) const;

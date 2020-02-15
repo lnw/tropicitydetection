@@ -126,7 +126,12 @@ int main(int argc, char** argv) {
     const vector<double> origin(cube.get_origin());
     const vector<double> spacing(cube.get_spacing());
     coord3d point((stod(argv[3]) - origin[0]) / spacing[0], (stod(argv[4]) - origin[1]) / spacing[1], (stod(argv[5]) - origin[2]) / spacing[2]);
-    trajectory traj(point, cube.getvector(point), 0.01);
+    auto optvect = cube.getvector(point);
+    if (!optvect) {
+      cout << "point outsie the box" << endl;
+      return 1;
+    }
+    trajectory traj(point, optvect.value(), 0.01);
     traj.complete(cube);
     traj.write2mathematicalist("traj.txt");
     cout << "\nclassification: " << as_integer(traj.classify(cube, 4)) << "\n";

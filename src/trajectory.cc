@@ -10,32 +10,43 @@
 using namespace std;
 
 
-void trajectory::extend_euler(const Cube& cube) { //Euler
-  const coord3d nextposition(positions[positions.size() - 1] + directions[directions.size() - 1].normalised() * step_length);
-  if (!cube.outofbounds(nextposition))
-    append(nextposition, cube.getvector(nextposition));
+bool trajectory::extend_euler(const Cube& cube) { //Euler
+  const coord3d nextposition(positions.back() + directions.back().normalised() * step_length);
+  auto optvect = cube.getvector(nextposition);
+  if (!optvect)
+    return false;
+  append(nextposition, cube.getvector(nextposition).value());
+  return true;
 }
 
 
 // the numbers in extend-rungekutta are not magic numbers. (see wikipedia article for runge-kutta method).
 // any other numbers (like "10000" or "0.05" are probably magic numbers.
 // beware
-void trajectory::extend_rungekutta(const Cube& cube) {
-  const coord3d c1 = positions[positions.size() - 1];
-  coord3d k1 = cube.getvector(c1);
-  k1 = k1.normalised() * step_length;
-  const coord3d c2 = positions[positions.size() - 1] + k1 * 0.5;
-  const coord3d v1 = cube.getvector(c2);
-  const coord3d k2 = v1.normalised() * step_length;
-  const coord3d c3 = positions[positions.size() - 1] + k2 * 0.5;
-  const coord3d v2 = cube.getvector(c3);
-  const coord3d k3 = v2.normalised() * step_length;
-  const coord3d c4 = positions[positions.size() - 1] + k3;
-  const coord3d v3 = cube.getvector(c4);
-  const coord3d k4 = v3.normalised() * step_length;
-  const coord3d nextposition(positions[positions.size() - 1] + (k1 + k2 * 2.0 + k3 * 2.0 + k4) / 6.0);
-  const coord3d c5 = cube.getvector(nextposition);
-  append(nextposition, c5);
+bool trajectory::extend_rungekutta(const Cube& cube) {
+  const coord3d c0 = positions.back();
+  const coord3d k0 = cube.getvector(c0).value().normalised() * step_length;
+  const coord3d c1 = c0 + k0 * 0.5;
+  auto v1 = cube.getvector(c1);
+  if (!v1)
+    return false;
+  const coord3d k1 = v1.value().normalised() * step_length;
+  const coord3d c2 = c0 + k1 * 0.5;
+  auto v2 = cube.getvector(c2);
+  if (!v2)
+    return false;
+  const coord3d k2 = v2.value().normalised() * step_length;
+  const coord3d c3 = c0 + k2;
+  auto v3 = cube.getvector(c3);
+  if (!v3)
+    return false;
+  const coord3d k3 = v3.value().normalised() * step_length;
+  const coord3d c4 = c0 + (k0 + k1 * 2.0 + k2 * 2.0 + k3) / 6.0;
+  auto v4 = cube.getvector(c4);
+  if (!v4)
+    return false;
+  append(c4, v4.value());
+  return true;
 }
 
 
@@ -52,17 +63,15 @@ void trajectory::complete(const Cube& cube) {
 
   const double return_ratio = 0.2;
   //if we get to a point that is less than SOME WELL-GUESSED FRACTION (1/5) of the longest distance in the trajectory
-  while ((positions[positions.size() - 1] - positions[0]).norm() > return_ratio * dist2farthest) {
-    // (looking back on this this cant be very effective... maybe the next summer worker can come up with a computationally cheaper alternative)
-    extend_rungekutta(cube);
-    step++;
-    if (cube.outofbounds(positions[positions.size() - 1] + directions[directions.size() - 1].normalised() * step_length)) {
-      out_of_bounds = true;
+  while ((positions.back() - positions[0]).norm() > return_ratio * dist2farthest) {
+    if (!extend_rungekutta(cube)) {
+       out_of_bounds = true;
       return;
     }
+    step++;
 
-    if ((positions[positions.size() - 1] - positions[0]).norm() > dist2farthest) {
-      dist2farthest = (positions[positions.size() - 1] - positions[0]).norm();
+    if ((positions.back() - positions[0]).norm() > dist2farthest) {
+      dist2farthest = (positions.back() - positions[0]).norm();
     }
 
     if (step > 10000) { //a single trajectory must not be more than this WELL-GUESSED number 10 000 of steps

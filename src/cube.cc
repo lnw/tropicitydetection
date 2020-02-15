@@ -3,8 +3,8 @@
 #include <iostream>
 #include <iterator>
 #include <list>
+#include <optional>
 #include <regex>
-#include <unistd.h>
 #include <vector>
 
 #include "cube.hh"
@@ -80,10 +80,10 @@ bool Cube::outofbounds(coord3d position) const {
 
 
 //linear interpolation
-coord3d Cube::getvector(coord3d position) const {
-  if (outofbounds(position)) {
-    return coord3d(7, 7, 7); //someone could write a list of these undocumented errorcodes?
-  }
+optional<coord3d> Cube::getvector(coord3d position) const {
+  if (outofbounds(position))
+    return {};
+
   coord3d intpos((int)position[0], (int)position[1], (int)position[2]);
   coord3d sumvec(0, 0, 0);
   double normsum = 0;
@@ -118,7 +118,9 @@ vector<vector<Tropicity>> Cube::gettropplaneZ(double zcoord) const {
     vector<Tropicity> point_tropicity;
     tropplaneZ.push_back(point_tropicity);
     for (int x = 0; x < xrange; x++) {
-      trajectory traj(coord3d(x, y, zcoord), getvector(coord3d(x, y, zcoord)), 0.01);
+      auto optvect = getvector(coord3d(x, y, zcoord));
+      assert(optvect);
+      trajectory traj(coord3d(x, y, zcoord), optvect.value(), 0.01);
       cout << "\nNEW TRAJECTORY CREATED AT\t" << x << "," << y << "," << zcoord << "\n";
       traj.complete(*this);
       const string filename = "new-" + to_string(x) + "-" + to_string(y) + "-" + to_string_with_precision(zcoord) + ".txt";
@@ -176,7 +178,9 @@ void Cube::splitgrid(string gridfile, string weightfile, int bfielddir) const {
   //next: get tropicity at each point, then write out two gridfiles
 
   for (size_t i = 0; i < gridpoints.size(); i++) {
-    trajectory traj(gridpoints[i], getvector(gridpoints[i]), 0.01);
+    auto optvect = getvector(gridpoints[i]);
+    assert(optvect);
+    trajectory traj(gridpoints[i], optvect.value(), 0.01);
     if (i % 100 == 0) {
       cout << "i=" << i << "/" << gridpoints.size() << "\n";
     }
@@ -196,14 +200,18 @@ void Cube::splitgrid(string gridfile, string weightfile, int bfielddir) const {
       zero_points.push_back(gridpoints_str[i]);
       zero_weights.push_back(gridweights_str[i]);
       ostringstream vectr;
-      vectr << to_string(getvector(gridpoints[i])[0]) << "," << to_string(getvector(gridpoints[i])[2]) << "," << to_string(getvector(gridpoints[i])[2]);
+      auto optvect = getvector(gridpoints[i]);
+      assert(optvect);
+      vectr << to_string(optvect.value()[0]) << "," << to_string(optvect.value()[2]) << "," << to_string(optvect.value()[2]);
       zero_intensities.push_back(vectr.str());
     }
     else if (classification == Tropicity::unclassifyable) {
       zero_points.push_back(gridpoints_str[i]);
       zero_weights.push_back(gridweights_str[i]);
       ostringstream vectr;
-      vectr << to_string(getvector(gridpoints[i])[0]) << "," << to_string(getvector(gridpoints[i])[1]) << "," << to_string(getvector(gridpoints[i])[2]);
+      auto optvect = getvector(gridpoints[i]);
+      assert(optvect);
+      vectr << to_string(optvect.value()[0]) << "," << to_string(optvect.value()[2]) << "," << to_string(optvect.value()[2]);
       vectr << "\t@\t" << gridpoints_str[i];
       zero_intensities.push_back(vectr.str());
       //cout<<"couldn't classify this point :o(\n";
@@ -214,14 +222,14 @@ void Cube::splitgrid(string gridfile, string weightfile, int bfielddir) const {
   ostringstream diapoutfile;
   diapoutfile << gridfile << "-diatropic";
   diapout.open(diapoutfile.str());
-  for (auto dp : dia_points) {
+  for (auto dp: dia_points) {
     diapout << dp << "\n";
   }
   diapout.close();
   ostringstream diawoutfile;
   diawoutfile << weightfile << "-diatropic";
   diawout.open(diawoutfile.str());
-  for (auto dw : dia_weights) {
+  for (auto dw: dia_weights) {
     diawout << dw << "\n";
   }
   diawout.close();
@@ -229,14 +237,14 @@ void Cube::splitgrid(string gridfile, string weightfile, int bfielddir) const {
   ostringstream parapoutfile;
   parapoutfile << gridfile << "-paratropic";
   parapout.open(parapoutfile.str());
-  for (auto pp : para_points) {
+  for (auto pp: para_points) {
     parapout << pp << "\n";
   }
   parapout.close();
   ostringstream parawoutfile;
   parawoutfile << weightfile << "-paratropic";
   parawout.open(parawoutfile.str());
-  for (auto pw : para_weights) {
+  for (auto pw: para_weights) {
     parawout << pw << "\n";
   }
   parawout.close();
@@ -244,19 +252,19 @@ void Cube::splitgrid(string gridfile, string weightfile, int bfielddir) const {
   ostringstream zeropoutfile;
   zeropoutfile << gridfile << "-zerotropic";
   zeropout.open(zeropoutfile.str());
-  for (auto zp : zero_points) {
+  for (auto zp: zero_points) {
     zeropout << zp << "\n";
   }
   zeropout.close();
   ostringstream zerowoutfile;
   zerowoutfile << weightfile << "-zerotropic";
   zerowout.open(zerowoutfile.str());
-  for (auto zw : zero_weights) {
+  for (auto zw: zero_weights) {
     zerowout << zw << "\n";
   }
   zerowout.close();
   zeroint.open("zerointensities.txt");
-  for (auto zi : zero_intensities) {
+  for (auto zi: zero_intensities) {
     zeroint << zi << "\n";
   }
 }
@@ -279,7 +287,9 @@ vector<vector<Tropicity>> Cube::gettropplane(int bfielddir, int fixeddir, double
       vector<Tropicity> point_tropicity;
       tropplane.push_back(point_tropicity);
       for (int x = 0; x < xrange; x++) {
-        trajectory traj(coord3d(x, y, fixedcoord), getvector(coord3d(x, y, fixedcoord)), steplength);
+        auto optvect = getvector(coord3d(x, y, fixedcoord));
+        assert(optvect);
+        trajectory traj(coord3d(x, y, fixedcoord), optvect.value(), steplength);
         traj.complete(*this);
         const Tropicity tr = traj.classify(*this, bfielddir);
         assert(tr != Tropicity::input_error);
@@ -296,7 +306,9 @@ vector<vector<Tropicity>> Cube::gettropplane(int bfielddir, int fixeddir, double
       vector<Tropicity> point_tropicity;
       tropplane.push_back(point_tropicity);
       for (int x = 0; x < xrange; x++) {
-        trajectory traj(coord3d(x, fixedcoord, z), getvector(coord3d(x, fixedcoord, z)), steplength);
+        auto optvect = getvector(coord3d(x, fixedcoord, z));
+        assert(optvect);
+        trajectory traj(coord3d(x, fixedcoord, z), optvect.value(), steplength);
         traj.complete(*this);
         const Tropicity tr = traj.classify(*this, bfielddir);
         assert(tr != Tropicity::input_error);
@@ -313,7 +325,9 @@ vector<vector<Tropicity>> Cube::gettropplane(int bfielddir, int fixeddir, double
       vector<Tropicity> point_tropicity;
       tropplane.push_back(point_tropicity);
       for (int z = 0; z < zrange; z++) {
-        trajectory traj(coord3d(fixedcoord, y, z), getvector(coord3d(fixedcoord, y, z)), steplength);
+        auto optvect = getvector(coord3d(fixedcoord, y, z));
+        assert(optvect);
+        trajectory traj(coord3d(fixedcoord, y, z), optvect.value(), steplength);
         traj.complete(*this);
         const Tropicity tr = traj.classify(*this, bfielddir);
         assert(tr != Tropicity::input_error);
@@ -343,7 +357,6 @@ void Cube::writetropplane(string filename, vector<vector<Tropicity>> tropicities
     outputfile << "\n";
   }
   outputfile << "}" << endl;
-  ;
 }
 
 
