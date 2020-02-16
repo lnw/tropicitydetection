@@ -86,9 +86,9 @@ optional<coord3d> Cube::getvector(coord3d position) const {
 
 #if 1
   // cout << position << endl;
-  int x = position[0];
-  int y = position[1];
-  int z = position[2];
+  double x = position[0];
+  double y = position[1];
+  double z = position[2];
   int x0 = int(floor(position[0]));
   int x1 = x0 + 1;
   int y0 = int(floor(position[1]));
