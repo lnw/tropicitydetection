@@ -85,7 +85,6 @@ optional<coord3d> Cube::getvector(coord3d position) const {
     return {};
 
 #if 1
-  // cout << position << endl;
   double x = position[0];
   double y = position[1];
   double z = position[2];
@@ -109,8 +108,8 @@ optional<coord3d> Cube::getvector(coord3d position) const {
   coord3d aux3 = (x1 - x) * v110 + (x - x0) * v111;
   coord3d aux4 = (y1 - y) * aux0 + (y - y0) * aux1;
   coord3d aux5 = (y1 - y) * aux2 + (y - y0) * aux3;
-  coord3d aux6 = (z1 - z) * aux4 + (z - z0) * aux5;
-  return aux6;
+  coord3d res = (z1 - z) * aux4 + (z - z0) * aux5;
+  return res;
 #else
   coord3d intpos((int)position[0], (int)position[1], (int)position[2]);
   coord3d sumvec(0, 0, 0);
@@ -153,7 +152,8 @@ vector<vector<Tropicity>> Cube::gettropplaneZ(double zcoord) const {
       traj.complete(*this);
       const string filename = "new-" + to_string(x) + "-" + to_string(y) + "-" + to_string_with_precision(zcoord) + ".txt";
       traj.write2mathematicalist(filename);
-      const Tropicity tr = traj.classify(*this, 4);
+      int bfielddir = 4;
+      const Tropicity tr = traj.classify(*this, bfielddir);
       assert(tr != Tropicity::input_error);
       tropplaneZ[y].push_back(tr);
     }

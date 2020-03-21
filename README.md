@@ -14,7 +14,7 @@ Example:
 ```
 
 ## 'gettropplane'
-'gettropplane' gets the tropicities of each point in a plane perpendicular to either the x, y or z axis.
+'gettropplane' gets the tropicities of each point in a plane perpendicular to either the x, y, or z axis.
 The output can be visualised in Mathematica with the commands
 ```
 'Get["tropplanefile.txt"]'
@@ -29,7 +29,9 @@ Example:
 
 ## python interface
 
-There is a thin python interface to most of the functionality.  Two example scripts are located in `bin'; the usage is the following:
+There is a thin python interface to most of the functionality.  Compiling it
+can be chosen separately.  Two example scripts are located in `bin'; the usage
+is the following:
 
 ```
 python assign_plane.py --input QZVPPDh2te-m06-2x.vti --output output.txt --bfielddir 5 --perpdir 0 --perpcoord 0.0
@@ -42,8 +44,7 @@ python splitgrid.py --input QZVPPDh2te-m06-2x.vti --bfielddir 5 --grid grid4h2te
 ```
 mkdir build
 cd build
-cmake .. -DCMAKE_BUILD_TYPE=<DEBUG,RELEASE>
+cmake .. -DCMAKE_BUILD_TYPE=<DEBUG,RELEASE> -DWITH_PYTHON=<TRUE,FALSE>
 make
-make install
 ```
 
