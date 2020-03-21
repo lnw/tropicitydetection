@@ -80,7 +80,7 @@ bool Cube::outofbounds(coord3d position) const {
 
 
 //linear interpolation
-optional<coord3d> Cube::getvector(coord3d position) const {
+std::optional<coord3d> Cube::getvector(coord3d position) const {
   if (outofbounds(position))
     return {};
 
@@ -378,7 +378,7 @@ void Cube::writetropplane(string filename, vector<vector<Tropicity>> tropicities
   outputfile.open(filename);
   outputfile << "trop = {\n";
   for (size_t i = 0; i < tropicities.size(); i++) {
-    outputfile << as_integer(tropicities[i]);
+    outputfile << vec_as_integer(tropicities[i]);
     if (i < tropicities.size() - 1) {
       outputfile << ",";
     }

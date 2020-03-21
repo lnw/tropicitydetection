@@ -1,8 +1,9 @@
-cmake_minimum_required(VERSION 2.8.0)
+cmake_minimum_required(VERSION 3.0)
 project(tropicity)
+enable_language(CXX)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED YES)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 set(CMAKE_VERBOSE_MAKEFILE FALSE)
 

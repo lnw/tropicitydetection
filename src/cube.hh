@@ -39,7 +39,7 @@ public:
   vector<vector<Tropicity>> gettropplane(int bfielddir, int fixeddir, double fixedcoord) const;
   void splitgrid(string gridfile, string weightfile, int bfielddir) const;
 
-  optional<coord3d> getvector(coord3d position) const;
+  std::optional<coord3d> getvector(coord3d position) const;
   coord3d getvector3(coord3d position) const;
 
   void writetropplane(string filename, vector<vector<Tropicity>> tropicities) const;
