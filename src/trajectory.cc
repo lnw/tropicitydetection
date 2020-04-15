@@ -22,7 +22,6 @@ bool trajectory::extend_euler(const Cube& cube) { //Euler
 
 // the numbers in extend-rungekutta are not magic numbers. (see wikipedia article for runge-kutta method).
 // any other numbers (like "10000" or "0.05" are probably magic numbers.
-// beware
 bool trajectory::extend_rungekutta(const Cube& cube) {
   const coord3d c0 = positions.back();
   const coord3d k0 = cube.getvector(c0).value().normalised() * step_length;
@@ -77,11 +76,8 @@ void trajectory::complete(const Cube& cube) {
     if (step > 10000) { //a single trajectory must not be more than this WELL-GUESSED number 10 000 of steps
       step = 0;
       step_length += 2;
-      int size = positions.size();
-      for (int a = 0; a < size - 1; a++) { //also this can't be very effective, there must be a way to wipe the positions and directions lists and create new blanks ones that is cheaper than this
-        positions.pop_back();
-        directions.pop_back();
-      }
+      positions.clear();
+      directions.clear();
       dist2farthest = -1;
     }
   }
