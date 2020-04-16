@@ -14,73 +14,67 @@
 using namespace std;
 
 struct coord3d {
-  double x[3];
+  double x[3] = {0, 0, 0};
 
-  //  coord3d(const vector <double> vec) { x[0] = vec[0]; x[1] = vec[1]; x[2] = vec[2]; }
-  coord3d(const double y[3]) {
+  constexpr coord3d(const double y[3]) {
     x[0] = y[0];
     x[1] = y[1];
     x[2] = y[2];
   }
-  coord3d(const double x_, const double y, const double z) {
+  constexpr coord3d(const double x_, const double y, const double z) {
     x[0] = x_;
     x[1] = y;
     x[2] = z;
   }
-  coord3d() {
-    x[0] = 0;
-    x[1] = 0;
-    x[2] = 0;
-  }
-  coord3d(const double theta, const double phi) {
+  coord3d() {}
+  constexpr coord3d(const double theta, const double phi) {
     x[0] = sin(theta) * cos(phi);
     x[1] = sin(theta) * sin(phi);
     x[2] = cos(theta);
-  } // and r=0
+  } // and r=1
 
-  coord3d operator/(const double d) const { return coord3d(*this) /= d; }
-  coord3d& operator/=(const double d) {
+  constexpr coord3d operator/(const double d) const { return coord3d(*this) /= d; }
+  constexpr coord3d& operator/=(const double d) {
     x[0] /= d;
     x[1] /= d;
     x[2] /= d;
     return *this;
   }
-  coord3d operator*(const double d) const { return coord3d(*this) *= d; }
-  friend coord3d operator*(const double d, const coord3d& c3d) { return c3d * d; }
-  friend coord3d operator*(const int i, const coord3d& c3d) { return c3d * i; }
-  coord3d& operator*=(const double d) {
+  constexpr coord3d operator*(const double d) const { return coord3d(*this) *= d; }
+  friend constexpr coord3d operator*(const double d, const coord3d& c3d) { return c3d * d; }
+  friend constexpr coord3d operator*(const int i, const coord3d& c3d) { return c3d * i; }
+  constexpr coord3d& operator*=(const double d) {
     x[0] *= d;
     x[1] *= d;
     x[2] *= d;
     return *this;
   }
-  coord3d operator+(const coord3d& y) const { return coord3d(*this) += y; }
-  coord3d& operator+=(const coord3d& y) {
+  constexpr coord3d operator+(const coord3d& y) const { return coord3d(*this) += y; }
+  constexpr coord3d& operator+=(const coord3d& y) {
     x[0] += y[0];
     x[1] += y[1];
     x[2] += y[2];
     return *this;
   }
-  coord3d operator-(const coord3d& y) const { return coord3d(*this) -= y; }
-  coord3d& operator-=(const coord3d& y) {
+  constexpr coord3d operator-(const coord3d& y) const { return coord3d(*this) -= y; }
+  constexpr coord3d& operator-=(const coord3d& y) {
     x[0] -= y[0];
     x[1] -= y[1];
     x[2] -= y[2];
     return *this;
   }
-  coord3d operator-() const {
+  constexpr coord3d operator-() const {
     coord3d y(-x[0], -x[1], -x[2]);
     return y;
   }
 
-  coord3d cross(const coord3d& y) const {
+  constexpr coord3d cross(const coord3d& y) const {
     return coord3d(x[1] * y[2] - x[2] * y[1], x[2] * y[0] - x[0] * y[2], x[0] * y[1] - x[1] * y[0]);
   }
-  double dot(const coord3d& y) const { return x[0] * y[0] + x[1] * y[1] + x[2] * y[2]; }
-  double norm() const { return sqrt(dot(*this)); }
-  //double norm() const { return sqrt(abs(dot(*this))); }
+  constexpr double dot(const coord3d& y) const { return x[0] * y[0] + x[1] * y[1] + x[2] * y[2]; }
+  constexpr double norm() const { return sqrt(dot(*this)); }
 
-  coord3d normalised() const {
+  constexpr coord3d normalised() const {
     const double normi = norm();
     if (normi == 0) {
       return coord3d(0, 0, 0);
@@ -90,13 +84,9 @@ struct coord3d {
     }
   }
 
-  double& operator[](const unsigned int i) { return x[i]; }
-  double operator[](const unsigned int i) const { return x[i]; }
+  constexpr double& operator[](const unsigned int i) { return x[i]; }
+  constexpr double operator[](const unsigned int i) const { return x[i]; }
 
-  //vector<double>::iterator begin(){return &x[0];}
-  //vector<double>::iterator end(){return &x[3];}
-
-  void scale(const double f);
 
   static double dist(const coord3d& x, const coord3d& y) { return (x - y).norm(); }
   // d^2/(dx_i dx_j) ||x|| = -x_i x_j/||x||^3 + [i==j]/||x||

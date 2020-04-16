@@ -40,8 +40,3 @@ double coord3d::dihedral(const coord3d& b, const coord3d& c, const coord3d& d) {
   return atan2(y, x);
 }
 
-void coord3d::scale(const double f) {
-  for (int i = 0; i < 3; i++) {
-    x[i] *= f;
-  }
-}

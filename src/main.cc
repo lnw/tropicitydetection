@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
     try {
       double fixedcoord = stod(argv[5]);
     }
-    catch (invalid_argument) {
+    catch (const std::invalid_argument& ia) {
       cout << "The fixed coordinate '" << argv[5] << "' was not a double in desired format.\n";
       errorsfound = true;
     }
@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
     try {
       int bfielddir = stoi(argv[3]);
     }
-    catch (invalid_argument) {
+    catch (const std::invalid_argument& ia) {
       cout << "The magnetic field direction '" << argv[3] << "' was not an integer in desired format.\n";
       errorsfound = true;
     }
@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
     try {
       int fixedcoordaxis = stoi(argv[4]);
     }
-    catch (invalid_argument) {
+    catch (const std::invalid_argument& ia) {
       cout << "The coord axis '" << argv[4] << "' was not an integer in desired format.\n";
       errorsfound = true;
     }
@@ -104,7 +104,7 @@ int main(int argc, char** argv) {
     try {
       int bfielddir = stoi(argv[3]);
     }
-    catch (invalid_argument) {
+    catch (const std::invalid_argument& ia) {
       cout << "The magnetic field direction '" << argv[3] << "' couldn't be interpreted as an integer.\n";
       return 7;
     }
