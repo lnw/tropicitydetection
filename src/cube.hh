@@ -1,5 +1,4 @@
-#ifndef CUBE_HH
-#define CUBE_HH
+#pragma once
 
 #include <cmath>
 #include <fstream>
@@ -18,8 +17,8 @@ class Cube {
   int n_x;
   int n_y;
   int n_z;
-  vector<double> origin;
-  vector<double> spacing;
+  coord3d origin;
+  coord3d spacing;
 
 public:
   Cube(string filename);
@@ -31,9 +30,14 @@ public:
     return field[n_x * n_y * z + n_x * y + x];
   }
 
-  vector<double> get_origin() const { return origin; }
-  vector<double> get_spacing() const { return spacing; }
-  bool outofbounds(coord3d position) const;
+  constexpr coord3d get_origin() const { return origin; }
+  constexpr coord3d get_spacing() const { return spacing; }
+  constexpr bool outofbounds(const coord3d& position) const { // where position is in 'cube coordinates', ie, with origin 0,0,0, and unit-spacing
+    if (position[0] > n_x || position[1] > n_y || position[2] > n_z || position[0] < 0 || position[1] < 0 || position[2] < 0) {
+      return true;
+    }
+    return false;
+  }
 
   vector<vector<Tropicity>> gettropplaneZ(double zcoord) const;
   vector<vector<Tropicity>> gettropplane(int bfielddir, int fixeddir, double fixedcoord) const;
@@ -46,4 +50,3 @@ public:
   void writecube(const string& filename) const;
 };
 
-#endif

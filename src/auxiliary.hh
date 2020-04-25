@@ -1,5 +1,4 @@
-#ifndef AUXILIARY_HH
-#define AUXILIARY_HH
+#pragma once
 
 #include <iomanip>
 #include <iostream>
@@ -29,11 +28,10 @@ ostream& operator<<(ostream& s, const pair<S, T>& p) {
 
 container_output(vector)
 
-    template <typename T>
-    std::string to_string_with_precision(const T a_value, const int n = 3) {
+template <typename T>
+std::string to_string_with_precision(const T a_value, const int n = 3) {
   std::ostringstream out;
   out << std::setprecision(n) << a_value;
   return out.str();
 }
 
-#endif

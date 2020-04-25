@@ -1,5 +1,4 @@
-#ifndef TRAJECTORY_HH
-#define TRAJECTORY_HH
+#pragma once
 
 #include <cassert>
 #include <iostream>
@@ -59,4 +58,3 @@ public:
   }
 };
 
-#endif

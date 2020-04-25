@@ -1,5 +1,4 @@
-#ifndef GEOMETRY3_HH
-#define GEOMETRY3_HH
+#pragma once
 
 #include <cassert>
 #include <cmath>
@@ -27,7 +26,7 @@ struct coord3d {
     x[2] = z;
   }
   coord3d() {}
-  constexpr coord3d(const double theta, const double phi) {
+  inline coord3d(const double theta, const double phi) {
     x[0] = sin(theta) * cos(phi);
     x[1] = sin(theta) * sin(phi);
     x[2] = cos(theta);
@@ -72,15 +71,15 @@ struct coord3d {
     return coord3d(x[1] * y[2] - x[2] * y[1], x[2] * y[0] - x[0] * y[2], x[0] * y[1] - x[1] * y[0]);
   }
   constexpr double dot(const coord3d& y) const { return x[0] * y[0] + x[1] * y[1] + x[2] * y[2]; }
-  constexpr double norm() const { return sqrt(dot(*this)); }
+  inline double norm() const { return sqrt(dot(*this)); }
 
-  constexpr coord3d normalised() const {
+  inline coord3d normalised() const {
     const double normi = norm();
     if (normi == 0) {
       return coord3d(0, 0, 0);
     }
     else {
-      return *this / norm();
+      return *this / normi;
     }
   }
 
@@ -115,5 +114,3 @@ struct coord3d {
   }
 };
 
-
-#endif

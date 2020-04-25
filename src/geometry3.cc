@@ -8,11 +8,11 @@
 
 // calculation of the angle beta at b(0,0,0)
 double coord3d::angle(const coord3d& a, const coord3d& c) {
-  const double L2 = a.dot(a);
-  const double R2 = c.dot(c);
-  const double M2 = (c - a).dot(c - a);
+  double L2 = a.dot(a);
+  double R2 = c.dot(c);
+  double M2 = (c - a).dot(c - a);
   //if (abs(M2)<1.e-10) return 0;
-  const double den = 2.0 * sqrt(L2 * R2);
+  double den = 2.0 * sqrt(L2 * R2);
   double arg = (L2 + R2 - M2) / den;
   if (arg > 1)
     return 0;

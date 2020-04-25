@@ -51,12 +51,8 @@ Cube::Cube(string filename) {
       n_x = stoi(results[3]) + 1;
       n_y = stoi(results[5]) + 1;
       n_z = stoi(results[7]) + 1;
-      origin.push_back(stod(results[10]));
-      origin.push_back(stod(results[11]));
-      origin.push_back(stod(results[12]));
-      spacing.push_back(stod(results[15]));
-      spacing.push_back(stod(results[16]));
-      spacing.push_back(stod(results[17]));
+      origin = coord3d(stod(results[10]), stod(results[11]), stod(results[12]));
+      spacing = coord3d(stod(results[15]), stod(results[16]), stod(results[17]));
     }
   }
 
@@ -71,20 +67,11 @@ Cube::Cube(string filename) {
 }
 
 
-bool Cube::outofbounds(coord3d position) const {
-  if (position[0] > n_x || position[1] > n_y || position[2] > n_z || position[0] < 0 || position[1] < 0 || position[2] < 0) {
-    return true;
-  }
-  return false;
-}
-
-
-//linear interpolation
+// trilinear interpolation
 std::optional<coord3d> Cube::getvector(coord3d position) const {
   if (outofbounds(position))
     return {};
 
-#if 1
   double x = position[0];
   double y = position[1];
   double z = position[2];
@@ -110,24 +97,6 @@ std::optional<coord3d> Cube::getvector(coord3d position) const {
   coord3d aux5 = (y1 - y) * aux2 + (y - y0) * aux3;
   coord3d res = (z1 - z) * aux4 + (z - z0) * aux5;
   return res;
-#else
-  coord3d intpos((int)position[0], (int)position[1], (int)position[2]);
-  coord3d sumvec(0, 0, 0);
-  double normsum = 0;
-  for (int z = 0; z < 2; ++z) {
-    for (int y = 0; y < 2; ++y) {
-      for (int x = 0; x < 2; ++x) {
-        const double norm = (coord3d(intpos[0] + x, intpos[1] + y, intpos[2] + z) - position).norm();
-        if (norm < 1e-12) { // magic number 1e-12: not checking form norm=0 because of floating point inaccuracy
-          return (*this)(position[2], position[1], position[0]);
-        }
-        normsum += 1.0 / norm;
-        sumvec += (*this)(intpos[2] + z, intpos[1] + y, intpos[0] + x) / norm;
-      }
-    }
-  }
-  return sumvec / normsum;
-#endif
 }
 
 
