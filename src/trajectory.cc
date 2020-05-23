@@ -20,8 +20,7 @@ bool trajectory::extend_euler(const Cube& cube) { //Euler
 }
 
 
-// the numbers in extend-rungekutta are not magic numbers. (see wikipedia article for runge-kutta method).
-// any other numbers (like "10000" or "0.05" are probably magic numbers.
+// Runge-Kutta method, 4th order
 bool trajectory::extend_rungekutta(const Cube& cube) {
   const coord3d c0 = positions.back();
   const coord3d k0 = cube.getvector(c0).value().normalised() * step_length;

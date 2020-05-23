@@ -109,7 +109,8 @@ struct coord3d {
 
   //  friend ostream& operator<<(ostream &s, const coord3d& c3d){ s << fixed << "{" << c3d[0] << "," << c3d[1] << "," << c3d[2]<< "}"; return s; }
   friend ostream& operator<<(ostream& s, const coord3d& c3d) {
-    s << scientific << "{" << c3d[0] << "," << c3d[1] << "," << c3d[2] << "}";
+    // s << scientific << "{" << c3d[0] << "," << c3d[1] << "," << c3d[2] << "}";
+    s << "{" << c3d[0] << "," << c3d[1] << "," << c3d[2] << "}";
     return s;
   }
 };

@@ -55,7 +55,7 @@ SpaceBeforeRangeBasedForLoopColon: false
 
 # SpaceInEmptyBlock: true
 SpaceInEmptyParentheses: false
-SpacesBeforeTrailingComments: 1
+SpacesBeforeTrailingComments: 2
 SpacesInAngles:  false
 SpacesInCStyleCastParentheses: false
 SpacesInContainerLiterals: true

@@ -7,6 +7,7 @@
 
 #include "cube.hh"
 #include "geometry3.hh"
+#include "configuration.hh"
 #include "trajectory.hh"
 #include "trop-enum.hh"
 
@@ -41,7 +42,7 @@ int main(int argc, char** argv) {
     }
 
     try {
-      double fixedcoord = stod(argv[5]);
+      stod(argv[5]);
     }
     catch (const std::invalid_argument& ia) {
       cout << "The fixed coordinate '" << argv[5] << "' was not a double in desired format.\n";
@@ -49,7 +50,7 @@ int main(int argc, char** argv) {
     }
 
     try {
-      int bfielddir = stoi(argv[3]);
+      stoi(argv[3]);
     }
     catch (const std::invalid_argument& ia) {
       cout << "The magnetic field direction '" << argv[3] << "' was not an integer in desired format.\n";
@@ -57,7 +58,7 @@ int main(int argc, char** argv) {
     }
 
     try {
-      int fixedcoordaxis = stoi(argv[4]);
+      stoi(argv[4]);
     }
     catch (const std::invalid_argument& ia) {
       cout << "The coord axis '" << argv[4] << "' was not an integer in desired format.\n";
@@ -102,7 +103,7 @@ int main(int argc, char** argv) {
     }
 
     try {
-      int bfielddir = stoi(argv[3]);
+      stoi(argv[3]);
     }
     catch (const std::invalid_argument& ia) {
       cout << "The magnetic field direction '" << argv[3] << "' couldn't be interpreted as an integer.\n";
@@ -128,7 +129,7 @@ int main(int argc, char** argv) {
     coord3d point((stod(argv[3]) - origin[0]) / spacing[0], (stod(argv[4]) - origin[1]) / spacing[1], (stod(argv[5]) - origin[2]) / spacing[2]);
     auto optvect = cube.getvector(point);
     if (!optvect) {
-      cout << "point outsie the box" << endl;
+      cout << "point outside the box" << endl;
       return 1;
     }
     trajectory traj(point, optvect.value(), 0.01);

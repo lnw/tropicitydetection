@@ -5,8 +5,8 @@ enable_language(CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
-set(CMAKE_VERBOSE_MAKEFILE FALSE)
-# set(CMAKE_CXX_CLANG_TIDY clang-tidy)
+set(CMAKE_VERBOSE_MAKEFILE TRUE)
+set(CMAKE_CXX_CLANG_TIDY clang-tidy)
 
 if(NOT WITH_PYTHON)
   SET(WITH_PYTHON FALSE)
@@ -41,4 +41,5 @@ message(STATUS "with python: " ${WITH_PYTHON} )
 message(STATUS "build type: " ${CMAKE_BUILD_TYPE} )
 
 add_subdirectory(src)
+add_subdirectory(tests)
 

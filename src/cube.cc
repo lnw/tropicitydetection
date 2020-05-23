@@ -81,18 +81,18 @@ std::optional<coord3d> Cube::getvector(coord3d position) const {
   int y1 = y0 + 1;
   int z0 = int(floor(position[2]));
   int z1 = z0 + 1;
-  coord3d v000 = (*this)(z0, y0, x0);
-  coord3d v001 = (*this)(z0, y0, x1);
-  coord3d v010 = (*this)(z0, y1, x0);
-  coord3d v011 = (*this)(z0, y1, x1);
-  coord3d v100 = (*this)(z1, y0, x0);
-  coord3d v101 = (*this)(z1, y0, x1);
-  coord3d v110 = (*this)(z1, y1, x0);
-  coord3d v111 = (*this)(z1, y1, x1);
-  coord3d aux0 = (x1 - x) * v000 + (x - x0) * v001;
-  coord3d aux1 = (x1 - x) * v010 + (x - x0) * v011;
-  coord3d aux2 = (x1 - x) * v100 + (x - x0) * v101;
-  coord3d aux3 = (x1 - x) * v110 + (x - x0) * v111;
+  coord3d v000 = (*this)(x0, y0, z0);
+  coord3d v001 = (*this)(x0, y0, z1);
+  coord3d v010 = (*this)(x0, y1, z0);
+  coord3d v011 = (*this)(x0, y1, z1);
+  coord3d v100 = (*this)(x1, y0, z0);
+  coord3d v101 = (*this)(x1, y0, z1);
+  coord3d v110 = (*this)(x1, y1, z0);
+  coord3d v111 = (*this)(x1, y1, z1);
+  coord3d aux0 = (x1 - x) * v000 + (x - x0) * v100;
+  coord3d aux1 = (x1 - x) * v010 + (x - x0) * v110;
+  coord3d aux2 = (x1 - x) * v001 + (x - x0) * v101;
+  coord3d aux3 = (x1 - x) * v011 + (x - x0) * v111;
   coord3d aux4 = (y1 - y) * aux0 + (y - y0) * aux1;
   coord3d aux5 = (y1 - y) * aux2 + (y - y0) * aux3;
   coord3d res = (z1 - z) * aux4 + (z - z0) * aux5;
@@ -100,9 +100,9 @@ std::optional<coord3d> Cube::getvector(coord3d position) const {
 }
 
 
-//skeleton function for tricubic interpolation later on we figured out that
-//it's probably more expensive to use tricubic interpolation than to make up
-//for the linear one by increasing grid resolution
+// skeleton function for tricubic interpolation later on we figured out that
+// it's probably more expensive to use tricubic interpolation than to make up
+// for the linear one by increasing grid resolution
 coord3d Cube::getvector3(coord3d position) const {
   return coord3d(7, 7, 7);
 }
@@ -133,18 +133,18 @@ vector<vector<Tropicity>> Cube::gettropplaneZ(double zcoord) const {
 
 void Cube::splitgrid(string gridfile, string weightfile, int bfielddir) const {
 
-  vector<coord3d> gridpoints;      //coordinates from the grid input file are read into this vector
-  vector<double> gridweights;      //weights from the weight input file are read into this vector
-  vector<string> gridpoints_str;   //coordinates from the grid input file are read into this vector
-  vector<string> gridweights_str;  //weights from the weight input file are read into this vector
-  vector<string> dia_points;       //coordinates that were classified as diatropic are written into this vector
-  vector<string> dia_weights;      //and corresponding weights into this vector
-  vector<string> para_points;      //coordinates that were classified as paratropic are written into this vector
-  vector<string> para_weights;     //and corresponding weights into this vector
-  vector<string> zero_points;      //if a coordinate couldn't be classified (trajectory got out of bounds), it is written into this vector
-  vector<string> zero_weights;     //and the corresponding weight into this vector
-  vector<string> zero_intensities; // if a coordinate couldn't be classified, the vector at that coord will be written here.
-                                   // lets one check for convergence
+  vector<coord3d> gridpoints;       //coordinates from the grid input file are read into this vector
+  vector<double> gridweights;       //weights from the weight input file are read into this vector
+  vector<string> gridpoints_str;    //coordinates from the grid input file are read into this vector
+  vector<string> gridweights_str;   //weights from the weight input file are read into this vector
+  vector<string> dia_points;        //coordinates that were classified as diatropic are written into this vector
+  vector<string> dia_weights;       //and corresponding weights into this vector
+  vector<string> para_points;       //coordinates that were classified as paratropic are written into this vector
+  vector<string> para_weights;      //and corresponding weights into this vector
+  vector<string> zero_points;       //if a coordinate couldn't be classified (trajectory got out of bounds), it is written into this vector
+  vector<string> zero_weights;      //and the corresponding weight into this vector
+  vector<string> zero_intensities;  // if a coordinate couldn't be classified, the vector at that coord will be written here.
+                                    // lets one check for convergence
 
   fstream grid(gridfile);
   string gridline;
