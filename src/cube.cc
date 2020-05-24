@@ -116,13 +116,13 @@ vector<vector<Tropicity>> Cube::gettropplaneZ(double zcoord) const {
     for (int x = 0; x < n_x; x++) {
       auto optvect = getvector(coord3d(x, y, zcoord));
       assert(optvect);
-      trajectory traj(coord3d(x, y, zcoord), optvect.value(), 0.01);
+      Trajectory traj(coord3d(x, y, zcoord), optvect.value(), 0.01);
       cout << "\nNEW TRAJECTORY CREATED AT\t" << x << "," << y << "," << zcoord << "\n";
       traj.complete(*this);
       const string filename = "new-" + to_string(x) + "-" + to_string(y) + "-" + to_string_with_precision(zcoord) + ".txt";
       traj.write2mathematicalist(filename);
-      int bfielddir = 4;
-      const Tropicity tr = traj.classify(*this, bfielddir);
+      Direction bfielddir = Direction::pos_z;
+      const Tropicity tr = traj.classify(bfielddir);
       assert(tr != Tropicity::input_error);
       tropplaneZ[y].push_back(tr);
     }
@@ -131,7 +131,7 @@ vector<vector<Tropicity>> Cube::gettropplaneZ(double zcoord) const {
 }
 
 
-void Cube::splitgrid(string gridfile, string weightfile, int bfielddir) const {
+void Cube::splitgrid(string gridfile, string weightfile, Direction bfielddir) const {
 
   vector<coord3d> gridpoints;       //coordinates from the grid input file are read into this vector
   vector<double> gridweights;       //weights from the weight input file are read into this vector
@@ -177,13 +177,13 @@ void Cube::splitgrid(string gridfile, string weightfile, int bfielddir) const {
   for (size_t i = 0; i < gridpoints.size(); i++) {
     auto optvect = getvector(gridpoints[i]);
     assert(optvect);
-    trajectory traj(gridpoints[i], optvect.value(), 0.01);
+    Trajectory traj(gridpoints[i], optvect.value(), 0.01);
     if (i % 100 == 0) {
       cout << "i=" << i << "/" << gridpoints.size() << "\n";
     }
     //cout<<"\nNEW TRAJECTORY CREATED AT\t"<<gridpoints[i]<<"\n";
     traj.complete(*this);
-    const Tropicity classification = traj.classify(*this, bfielddir);
+    const Tropicity classification = traj.classify(bfielddir);
     assert(classification != Tropicity::input_error);
     if (classification == Tropicity::diatropic) {
       dia_points.push_back(gridpoints_str[i]);
@@ -271,8 +271,8 @@ void Cube::splitgrid(string gridfile, string weightfile, int bfielddir) const {
 // direction perpendicular to it (fixeddir), and the offset with respect to
 // that coordinate (fixedcoord).  The plane covers the whole crosssection of
 // the cube.
-vector<vector<Tropicity>> Cube::gettropplane(int bfielddir, int fixeddir, double fixedcoord) const {
-  assert(bfielddir >= 0 && bfielddir <= 5);
+vector<vector<Tropicity>> Cube::gettropplane(Direction bfielddir, int fixeddir, double fixedcoord) const {
+  // assert(bfielddir >= 0 && bfielddir <= 5);
   assert(fixeddir >= 0 && fixeddir <= 2);
   double steplength = 0.01;
   vector<vector<Tropicity>> tropplane;
@@ -286,9 +286,9 @@ vector<vector<Tropicity>> Cube::gettropplane(int bfielddir, int fixeddir, double
       for (int x = 0; x < n_x; x++) {
         auto optvect = getvector(coord3d(x, y, fixedcoord));
         assert(optvect);
-        trajectory traj(coord3d(x, y, fixedcoord), optvect.value(), steplength);
+        Trajectory traj(coord3d(x, y, fixedcoord), optvect.value(), steplength);
         traj.complete(*this);
-        const Tropicity tr = traj.classify(*this, bfielddir);
+        const Tropicity tr = traj.classify(bfielddir);
         assert(tr != Tropicity::input_error);
         tropplane[y].push_back(tr);
       }
@@ -305,9 +305,9 @@ vector<vector<Tropicity>> Cube::gettropplane(int bfielddir, int fixeddir, double
       for (int x = 0; x < n_x; x++) {
         auto optvect = getvector(coord3d(x, fixedcoord, z));
         assert(optvect);
-        trajectory traj(coord3d(x, fixedcoord, z), optvect.value(), steplength);
+        Trajectory traj(coord3d(x, fixedcoord, z), optvect.value(), steplength);
         traj.complete(*this);
-        const Tropicity tr = traj.classify(*this, bfielddir);
+        const Tropicity tr = traj.classify(bfielddir);
         assert(tr != Tropicity::input_error);
         tropplane[z].push_back(tr);
       }
@@ -324,9 +324,9 @@ vector<vector<Tropicity>> Cube::gettropplane(int bfielddir, int fixeddir, double
       for (int z = 0; z < n_z; z++) {
         auto optvect = getvector(coord3d(fixedcoord, y, z));
         assert(optvect);
-        trajectory traj(coord3d(fixedcoord, y, z), optvect.value(), steplength);
+        Trajectory traj(coord3d(fixedcoord, y, z), optvect.value(), steplength);
         traj.complete(*this);
-        const Tropicity tr = traj.classify(*this, bfielddir);
+        const Tropicity tr = traj.classify(bfielddir);
         assert(tr != Tropicity::input_error);
         tropplane[y].push_back(tr);
       }

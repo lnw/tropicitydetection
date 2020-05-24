@@ -9,19 +9,21 @@
 #include "cube.hh"
 #include "geometry3.hh"
 #include "trop-enum.hh"
+#include "dir-enum.hh"
 
 using namespace std;
 
 
-class trajectory {
+class Trajectory {
   vector<coord3d> positions;
   vector<coord3d> directions;
   double step_length;
   bool out_of_bounds = false;
 
 public:
-  trajectory(const coord3d& pos, const coord3d& dir, const double eps = 0.01): step_length(eps) { positions.push_back(pos), directions.push_back(dir); }
-  trajectory(const trajectory& traj): positions(traj.get_positions()), directions(traj.get_directions()), step_length(traj.get_step_length()) {}
+  Trajectory() = default;
+  Trajectory(const coord3d& pos, const coord3d& dir, const double eps = 0.01): step_length(eps) { positions.push_back(pos), directions.push_back(dir); }
+  Trajectory(const Trajectory& traj): positions(traj.get_positions()), directions(traj.get_directions()), step_length(traj.get_step_length()) {}
 
   vector<coord3d> get_positions() const { return positions; }
   vector<coord3d> get_directions() const { return directions; }
@@ -45,14 +47,14 @@ public:
   // extend trajectory until some criterion is met
   void complete(const Cube& cube);
   // return -1 or +1 for B dot (\sum r_i cross (p_i+1 - p_i)) less/greater zero
-  Tropicity classify(const Cube& cube, int bfielddir) const;
+  Tropicity classify(Direction bfielddir) const;
 
   void write2mathematicalist(string filename);
 
-  bool to_mathematica(const trajectory& t, FILE* file);
+  bool to_mathematica(const Trajectory& t, FILE* file);
 
 
-  friend ostream& operator<<(ostream& s, const trajectory& T) {
+  friend ostream& operator<<(ostream& s, const Trajectory& T) {
     s << fixed << T.positions << "," << T.directions << "," << T.step_length;
     return s;
   }

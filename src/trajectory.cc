@@ -10,7 +10,7 @@
 using namespace std;
 
 
-bool trajectory::extend_euler(const Cube& cube) { //Euler
+bool Trajectory::extend_euler(const Cube& cube) { //Euler
   const coord3d nextposition(positions.back() + directions.back().normalised() * step_length);
   auto optvect = cube.getvector(nextposition);
   if (!optvect)
@@ -21,7 +21,7 @@ bool trajectory::extend_euler(const Cube& cube) { //Euler
 
 
 // Runge-Kutta method, 4th order
-bool trajectory::extend_rungekutta(const Cube& cube) {
+bool Trajectory::extend_rungekutta(const Cube& cube) {
   const coord3d c0 = positions.back();
   const coord3d k0 = cube.getvector(c0).value().normalised() * step_length;
   const coord3d c1 = c0 + k0 * 0.5;
@@ -48,7 +48,7 @@ bool trajectory::extend_rungekutta(const Cube& cube) {
 }
 
 
-void trajectory::complete(const Cube& cube) {
+void Trajectory::complete(const Cube& cube) {
   //const double threshold = 1e-2;
   //if (directions[0].norm() < threshold) {out_of_bounds=true; return;} //if the intensity is vero low, don't bother completing. classify as "out_of_bounds"
   //the above is commented out because i didn't figure out what would be a good value for this threshold
@@ -83,30 +83,30 @@ void trajectory::complete(const Cube& cube) {
 }
 
 
-Tropicity trajectory::classify(const Cube& cube, int bfielddir) const {
+Tropicity Trajectory::classify(Direction bfielddir) const {
   coord3d bfield;
   switch (bfielddir) {
-    case 0: {
+    case Direction::pos_x: {
       bfield = coord3d(1, 0, 0);
       break;
     }
-    case 1: {
+    case Direction::neg_x: {
       bfield = coord3d(-1, 0, 0);
       break;
     }
-    case 2: {
+    case Direction::pos_y: {
       bfield = coord3d(0, 1, 0);
       break;
     }
-    case 3: {
+    case Direction::neg_y: {
       bfield = coord3d(0, -1, 0);
       break;
     }
-    case 4: {
+    case Direction::pos_z: {
       bfield = coord3d(0, 0, 1);
       break;
     }
-    case 5: {
+    case Direction::neg_z: {
       bfield = coord3d(0, 0, -1);
       break;
     }
@@ -136,7 +136,7 @@ Tropicity trajectory::classify(const Cube& cube, int bfielddir) const {
 }
 
 
-void trajectory::write2mathematicalist(string filename) {
+void Trajectory::write2mathematicalist(string filename) {
   ofstream outputfile;
   outputfile.open(filename);
   outputfile << "traj = {{";
@@ -149,7 +149,7 @@ void trajectory::write2mathematicalist(string filename) {
   outputfile << "}}";
 }
 
-bool trajectory::to_mathematica(const trajectory& t, FILE* file) {
+bool Trajectory::to_mathematica(const Trajectory& t, FILE* file) {
   ostringstream s;
   s << "traj = {{" << fixed << positions << "}};" << endl;
   s << "Graphics3D[{Arrow@#} & /@ data]" << endl;

@@ -8,6 +8,7 @@
 
 #include "geometry3.hh"
 #include "trop-enum.hh"
+#include "dir-enum.hh"
 
 
 class Cube {
@@ -43,8 +44,8 @@ public:
   }
 
   std::vector<std::vector<Tropicity>> gettropplaneZ(double zcoord) const;
-  std::vector<std::vector<Tropicity>> gettropplane(int bfielddir, int fixeddir, double fixedcoord) const;
-  void splitgrid(std::string gridfile, std::string weightfile, int bfielddir) const;
+  std::vector<std::vector<Tropicity>> gettropplane(Direction bfielddir, int fixeddir, double fixedcoord) const;
+  void splitgrid(std::string gridfile, std::string weightfile, Direction bfielddir) const;
 
   std::optional<coord3d> getvector(coord3d position) const;
   std::optional<coord3d> getvector(double x, double y, double z) const {

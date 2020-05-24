@@ -5,14 +5,16 @@
 #include <iostream>
 #include <vector>
 
-#include "cube.hh"
-#include "geometry3.hh"
 #include "configuration.hh"
+#include "cube.hh"
+#include "dir-enum.hh"
+#include "geometry3.hh"
 #include "trajectory.hh"
 #include "trop-enum.hh"
 
 
 using namespace std;
+
 
 int main(int argc, char** argv) {
 
@@ -28,8 +30,8 @@ int main(int argc, char** argv) {
 
   char* command = argv[1];
 
-  if (strcmp(command, "gettropplane") == 0) { //run trop plane getter
-                                              //---------------below this line we're checking that the arguments are OK
+  if (strcmp(command, "gettropplane") == 0) {  //run trop plane getter
+                                               //---------------below this line we're checking that the arguments are OK
     if (argc != 7) {
       cout << "gettropplane expects 5 arguments.\n";
       cout << "1: Input file in .vti format\n";
@@ -84,12 +86,13 @@ int main(int argc, char** argv) {
     //---------------above this line we're checking that the arguments are OK
 
 
+    Direction dir(to_direction(stoi(argv[3])));
     Cube cube(argv[2]);
-    vector<vector<Tropicity>> tropplane = cube.gettropplane(stoi(argv[3]), stoi(argv[4]), stod(argv[5]));
+    vector<vector<Tropicity>> tropplane = cube.gettropplane(dir, stoi(argv[4]), stod(argv[5]));
     cube.writetropplane(argv[6], tropplane);
     return 0;
   }
-  else if (strcmp(command, "splitgrid") == 0) { //run gridsplitter
+  else if (strcmp(command, "splitgrid") == 0) {  //run gridsplitter
 
     if (argc != 6) {
       cout << "splitgrid expects 4 arguments.\n";
@@ -116,13 +119,14 @@ int main(int argc, char** argv) {
       cout << "Entered value was: " << argv[3] << "\n";
       return 7;
     }
+    Direction dir(to_direction(stoi(argv[3])));
     Cube cube(argv[2]);
-    cube.splitgrid(argv[4], argv[5], stoi(argv[3]));
+    cube.splitgrid(argv[4], argv[5], dir);
     return 0;
   }
-  else if (strcmp(command, "traj") == 0) { //this gets the trajectory at a given point and outputs it in a format that can be visualized in Mathematica
-                                           //this is for debugging purposes mostly
-                                           //no command line argument error handling has been implemented yet, but one could pretty much copy-paste that from above
+  else if (strcmp(command, "traj") == 0) {  //this gets the trajectory at a given point and outputs it in a format that can be visualized in Mathematica
+                                            //this is for debugging purposes mostly
+                                            //no command line argument error handling has been implemented yet, but one could pretty much copy-paste that from above
     Cube cube(argv[2]);
     const coord3d origin(cube.get_origin());
     const coord3d spacing(cube.get_spacing());
@@ -132,10 +136,10 @@ int main(int argc, char** argv) {
       cout << "point outside the box" << endl;
       return 1;
     }
-    trajectory traj(point, optvect.value(), 0.01);
+    Trajectory traj(point, optvect.value(), 0.01);
     traj.complete(cube);
     traj.write2mathematicalist("traj.txt");
-    cout << "\nclassification: " << as_integer(traj.classify(cube, 4)) << "\n";
+    cout << "\nclassification: " << as_integer(traj.classify(Direction::pos_z)) << "\n";
     return 0;
   }
   else {

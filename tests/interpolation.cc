@@ -5,12 +5,12 @@
 
 using namespace std;
 
-class Interpolation: public ::testing::Test {
+class InterpolationTest: public ::testing::Test {
 public:
   const double epsilon = 1.e-6;
 };
 
-TEST_F(Interpolation, iscontinuous) {
+TEST_F(InterpolationTest, iscontinuous) {
 
   Cube cube(3, 3, 3);
   for (int x = 0; x < cube.nx(); x++) {
@@ -71,7 +71,7 @@ TEST_F(Interpolation, iscontinuous) {
       4 * epsilon);
 }
 
-TEST_F(Interpolation, nointerpolation) {
+TEST_F(InterpolationTest, nointerpolation) {
 
   Cube cube(3, 3, 3);
   for (int x = 0; x < cube.nx(); x++) {

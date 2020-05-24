@@ -31,7 +31,7 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
 endif()
 
 # Now simply link against gtest or gtest_main as needed. Eg
-add_executable(tropicity_tests example.cpp interpolation.cc)
+add_executable(tropicity_tests example.cpp interpolation.cc tropicityclassification.cc)
 target_link_libraries(tropicity_tests trop gtest_main)
 
 add_test(NAME tropicity_tests COMMAND tropicity_tests)
