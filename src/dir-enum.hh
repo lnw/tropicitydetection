@@ -8,7 +8,7 @@ enum class Direction : unsigned short { pos_x = 0,
                                         neg_z };
 
 
-Direction to_direction(int i) {
+inline Direction to_direction(int i) {
   switch (i) {
     case 0:
       return Direction::pos_x;
@@ -23,4 +23,5 @@ Direction to_direction(int i) {
     case 5:
       return Direction::neg_z;
   }
+  assert(false);
 }

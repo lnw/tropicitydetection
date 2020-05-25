@@ -1,4 +1,5 @@
 
+#include <algorithm>
 #include <cassert>
 #include <iostream>
 #include <vector>
@@ -10,7 +11,7 @@
 using namespace std;
 
 
-bool Trajectory::extend_euler(const Cube& cube) { //Euler
+bool Trajectory::extend_euler(const Cube& cube) {  // Euler
   const coord3d nextposition(positions.back() + directions.back().normalised() * step_length);
   auto optvect = cube.getvector(nextposition);
   if (!optvect)
@@ -48,31 +49,31 @@ bool Trajectory::extend_rungekutta(const Cube& cube) {
 }
 
 
-void Trajectory::complete(const Cube& cube) {
-  //const double threshold = 1e-2;
-  //if (directions[0].norm() < threshold) {out_of_bounds=true; return;} //if the intensity is vero low, don't bother completing. classify as "out_of_bounds"
-  //the above is commented out because i didn't figure out what would be a good value for this threshold
-  //if someone does, this would probably save some computational time
-  const double step_length_ratio = 0.05;
-  step_length = step_length_ratio * cube.get_spacing()[0];
+void Trajectory::complete(const Cube& cube, double return_ratio) {
+  // if (directions[0].norm() < threshold) {out_of_bounds=true; return;} //if the intensity is vero low, don't bother completing. classify as "out_of_bounds"
+  // the above is commented out because i didn't figure out what would be a good value for this threshold
+  // if someone does, this would probably save some computational time
+  // const double step_length_ratio = 0.05;
+  // step_length = step_length_ratio * cube.get_spacing()[0];
+
+  double dist2farthest = -1;  // if this is set at 0 at declaration, the following while loop will never run
+  if (positions.size() > 1) {
+    for (auto pos: positions)
+      dist2farthest = std::max(dist2farthest, (pos - positions[0]).norm());
+  }
 
   int step = 0;
-  double dist2farthest = -1; //if this is set at 0 at declaration, the following while loop will never run
-
-  const double return_ratio = 0.2;
-  //if we get to a point that is less than SOME WELL-GUESSED FRACTION (1/5) of the longest distance in the trajectory
+  // if we get to a point that is less return_ratio of the longest distance in the trajectory
   while ((positions.back() - positions[0]).norm() > return_ratio * dist2farthest) {
     if (!extend_rungekutta(cube)) {
-       out_of_bounds = true;
+      out_of_bounds = true;
       return;
     }
     step++;
 
-    if ((positions.back() - positions[0]).norm() > dist2farthest) {
-      dist2farthest = (positions.back() - positions[0]).norm();
-    }
+    dist2farthest = std::max(dist2farthest, (positions.back() - positions[0]).norm());
 
-    if (step > 10000) { //a single trajectory must not be more than this WELL-GUESSED number 10 000 of steps
+    if (step > 10000) {  // a single trajectory must not be more than this WELL-GUESSED number 10 000 of steps
       step = 0;
       step_length += 2;
       positions.clear();
