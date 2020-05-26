@@ -38,7 +38,7 @@ public:
     positions.push_back(p.first);
     directions.push_back(p.second);
   }
-  pair<coord3d, coord3d> get(const unsigned int i) const { return make_pair(positions[i], directions[i]); }
+  // pair<coord3d, coord3d> get(const unsigned int i) const { return make_pair(positions[i], directions[i]); }
 
   // extend trajectory by one element using Euler
   bool extend_euler(const Cube& cube);

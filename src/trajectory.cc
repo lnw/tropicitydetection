@@ -55,6 +55,7 @@ void Trajectory::complete(const Cube& cube, double return_ratio) {
   // if someone does, this would probably save some computational time
   // const double step_length_ratio = 0.05;
   // step_length = step_length_ratio * cube.get_spacing()[0];
+  int max_steps = 10000;
 
   double dist2farthest = -1;  // if this is set at 0 at declaration, the following while loop will never run
   if (positions.size() > 1) {
@@ -73,7 +74,7 @@ void Trajectory::complete(const Cube& cube, double return_ratio) {
 
     dist2farthest = std::max(dist2farthest, (positions.back() - positions[0]).norm());
 
-    if (step > 10000) {  // a single trajectory must not be more than this WELL-GUESSED number 10 000 of steps
+    if (step > max_steps) {
       step = 0;
       step_length += 2;
       positions.clear();
