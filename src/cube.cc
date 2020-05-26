@@ -108,43 +108,19 @@ coord3d Cube::getvector3(coord3d position) const {
 }
 
 
-vector<vector<Tropicity>> Cube::gettropplaneZ(double zcoord) const {
-  vector<vector<Tropicity>> tropplaneZ;
-  for (int y = 0; y < n_y; y++) {
-    vector<Tropicity> point_tropicity;
-    tropplaneZ.push_back(point_tropicity);
-    for (int x = 0; x < n_x; x++) {
-      auto optvect = getvector(coord3d(x, y, zcoord));
-      assert(optvect);
-      Trajectory traj(coord3d(x, y, zcoord), optvect.value(), 0.01);
-      cout << "\nNEW TRAJECTORY CREATED AT\t" << x << "," << y << "," << zcoord << "\n";
-      traj.complete(*this);
-      const string filename = "new-" + to_string(x) + "-" + to_string(y) + "-" + to_string_with_precision(zcoord) + ".txt";
-      traj.write2mathematicalist(filename);
-      Direction bfielddir = Direction::pos_z;
-      const Tropicity tr = traj.classify(bfielddir);
-      assert(tr != Tropicity::input_error);
-      tropplaneZ[y].push_back(tr);
-    }
-  }
-  return tropplaneZ;
-}
-
-
 void Cube::splitgrid(string gridfile, string weightfile, Direction bfielddir) const {
-
-  vector<coord3d> gridpoints;       //coordinates from the grid input file are read into this vector
-  vector<double> gridweights;       //weights from the weight input file are read into this vector
-  vector<string> gridpoints_str;    //coordinates from the grid input file are read into this vector
-  vector<string> gridweights_str;   //weights from the weight input file are read into this vector
-  vector<string> dia_points;        //coordinates that were classified as diatropic are written into this vector
-  vector<string> dia_weights;       //and corresponding weights into this vector
-  vector<string> para_points;       //coordinates that were classified as paratropic are written into this vector
-  vector<string> para_weights;      //and corresponding weights into this vector
-  vector<string> zero_points;       //if a coordinate couldn't be classified (trajectory got out of bounds), it is written into this vector
-  vector<string> zero_weights;      //and the corresponding weight into this vector
-  vector<string> zero_intensities;  // if a coordinate couldn't be classified, the vector at that coord will be written here.
-                                    // lets one check for convergence
+  vector<coord3d> gridpoints;      // coordinates from the grid input file are read into this vector
+  vector<double> gridweights;      // weights from the weight input file are read into this vector
+  vector<string> gridpoints_str;   // coordinates from the grid input file are read into this vector
+  vector<string> gridweights_str;  // weights from the weight input file are read into this vector
+  vector<string> dia_points;       // coordinates that were classified as diatropic are written into this vector
+  vector<string> dia_weights;      // and corresponding weights into this vector
+  vector<string> para_points;      // coordinates that were classified as paratropic are written into this vector
+  vector<string> para_weights;     // and corresponding weights into this vector
+  vector<string> zero_points;      // if a coordinate couldn't be classified (trajectory got out of bounds), it is written into this vector
+  vector<string> zero_weights;     // and the corresponding weight into this vector
+  vector<string> zero_intensities; // if a coordinate couldn't be classified, the vector at that coord will be written here.
+                                   // lets one check for convergence
 
   fstream grid(gridfile);
   string gridline;
@@ -177,7 +153,13 @@ void Cube::splitgrid(string gridfile, string weightfile, Direction bfielddir) co
   for (size_t i = 0; i < gridpoints.size(); i++) {
     auto optvect = getvector(gridpoints[i]);
     assert(optvect);
-    Trajectory traj(gridpoints[i], optvect.value(), 0.01);
+#if 0
+  double steplength = 0.01;
+#else
+    double step_length_ratio = 0.05;
+    double steplength = step_length_ratio * get_spacing()[0];
+#endif
+    Trajectory traj(gridpoints[i], optvect.value(), steplength);
     if (i % 100 == 0) {
       cout << "i=" << i << "/" << gridpoints.size() << "\n";
     }
@@ -274,7 +256,12 @@ void Cube::splitgrid(string gridfile, string weightfile, Direction bfielddir) co
 vector<vector<Tropicity>> Cube::gettropplane(Direction bfielddir, int fixeddir, double fixedcoord) const {
   // assert(bfielddir >= 0 && bfielddir <= 5);
   assert(fixeddir >= 0 && fixeddir <= 2);
+#if 0
   double steplength = 0.01;
+#else
+  double step_length_ratio = 0.05;
+  double steplength = step_length_ratio * get_spacing()[0];
+#endif
   vector<vector<Tropicity>> tropplane;
   if (fixeddir == 2) {
     fixedcoord = (fixedcoord - origin[2]) / spacing[2];
@@ -339,6 +326,13 @@ vector<vector<Tropicity>> Cube::gettropplane(Direction bfielddir, int fixeddir, 
     vector<vector<Tropicity>> emptyvec;
     return emptyvec;
   }
+}
+
+
+vector<vector<Tropicity>> Cube::gettropplaneZ(double zcoord) const {
+  Direction bfielddir = Direction::pos_z;
+  int plane_perp_dir = 2;
+  return gettropplane(bfielddir, plane_perp_dir, zcoord);
 }
 
 

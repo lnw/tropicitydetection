@@ -22,7 +22,7 @@ TEST_F(CompleteTrajTest, returnswithreasonablelength) {
     }
   }
 
-  coord3d startpos(50, 30, 30);  // 20 from centre
+  coord3d startpos(50, 30, 30); // 20 from centre
   coord3d startdir(0, 1, 0);
   double step_length = 0.02;
 
@@ -39,25 +39,25 @@ TEST_F(CompleteTrajTest, returnswithreasonablelength) {
   // cout << traj.size() << endl;
   int length02 = traj.size();
   ASSERT_LT(traj.size(), 2 * M_PI * 20 / step_length);
-  ASSERT_GT(length02, length04);  // traj should be longer if we abort later
+  ASSERT_GT(length02, length04); // traj should be longer if we abort later
 
   traj.complete(cube, 0.1);
   // cout << traj.size() << endl;
   int length01 = traj.size();
   ASSERT_LT(traj.size(), 2 * M_PI * 20 / step_length);
-  ASSERT_GT(length01, length02);  // traj should be longer if we abort later
+  ASSERT_GT(length01, length02); // traj should be longer if we abort later
 
   traj.complete(cube, 0.05);
   // cout << traj.size() << endl;
   int length005 = traj.size();
   ASSERT_LT(traj.size(), 2 * M_PI * 20 / step_length);
-  ASSERT_GT(length005, length01);  // traj should be longer if we abort later
+  ASSERT_GT(length005, length01); // traj should be longer if we abort later
 
   traj.complete(cube, 0.02);
   // cout << traj.size() << endl;
   int length002 = traj.size();
   ASSERT_LT(traj.size(), 2 * M_PI * 20 / step_length);
-  ASSERT_GT(length002, length005);  // traj should be longer if we abort later
+  ASSERT_GT(length002, length005); // traj should be longer if we abort later
 }
 
 
@@ -72,15 +72,15 @@ TEST_F(CompleteTrajTest, iscircular) {
     }
   }
 
-  coord3d startpos10(40, 30, 30);  // 10 from centre
+  coord3d startpos10(40, 30, 30); // 10 from centre
   coord3d startdir(0, 1, 0);
   double step_length = 0.02;
   Trajectory traj10(startpos10, startdir, step_length);
 
-  coord3d startpos20(50, 30, 30);  // 20 from centre
+  coord3d startpos20(50, 30, 30); // 20 from centre
   Trajectory traj20(startpos20, startdir, step_length);
 
-  coord3d startpos25(55, 30, 30);  // 25 from centre
+  coord3d startpos25(55, 30, 30); // 25 from centre
   Trajectory traj25(startpos25, startdir, step_length);
 
   traj10.complete(cube, 0.1);

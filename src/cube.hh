@@ -6,9 +6,9 @@
 #include <optional>
 #include <vector>
 
+#include "dir-enum.hh"
 #include "geometry3.hh"
 #include "trop-enum.hh"
-#include "dir-enum.hh"
 
 
 class Cube {
@@ -36,7 +36,7 @@ public:
 
   constexpr coord3d get_origin() const { return origin; }
   constexpr coord3d get_spacing() const { return spacing; }
-  constexpr bool outofbounds(const coord3d& position) const {  // where position is in 'cube coordinates', ie, with origin 0, 0, 0, and unit-spacing
+  constexpr bool outofbounds(const coord3d& position) const { // where position is in 'cube coordinates', ie, with origin 0, 0, 0, and unit-spacing
     if (position[0] > n_x || position[1] > n_y || position[2] > n_z || position[0] < 0 || position[1] < 0 || position[2] < 0) {
       return true;
     }

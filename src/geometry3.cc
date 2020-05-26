@@ -39,4 +39,3 @@ double coord3d::dihedral(const coord3d& b, const coord3d& c, const coord3d& d) {
 
   return atan2(y, x);
 }
-

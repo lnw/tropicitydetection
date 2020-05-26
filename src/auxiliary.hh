@@ -34,4 +34,3 @@ std::string to_string_with_precision(const T a_value, const int n = 3) {
   out << std::setprecision(n) << a_value;
   return out.str();
 }
-

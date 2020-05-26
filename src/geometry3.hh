@@ -114,4 +114,3 @@ struct coord3d {
     return s;
   }
 };
-

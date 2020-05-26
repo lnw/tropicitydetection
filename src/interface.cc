@@ -26,8 +26,8 @@ PYBIND11_PLUGIN(libtropicity) {
       .def("writetropplane", &Cube::writetropplane) // string, vector<vector<TROP>>
       .def("writecube", &Cube::writecube)           // string
       //.def("getvector", &Cube::getvector)           // coord3d
-      .def("outofbounds", &Cube::outofbounds)       //
-      .def("splitgrid", &Cube::splitgrid);          // string, string, int
+      .def("outofbounds", &Cube::outofbounds) //
+      .def("splitgrid", &Cube::splitgrid);    // string, string, int
 
   // class trajectory
   py::class_<trajectory>(mod, "trajectory")

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cassert>
+
 enum class Direction : unsigned short { pos_x = 0,
                                         neg_x,
                                         pos_y,

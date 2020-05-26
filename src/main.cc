@@ -30,8 +30,8 @@ int main(int argc, char** argv) {
 
   char* command = argv[1];
 
-  if (strcmp(command, "gettropplane") == 0) {  //run trop plane getter
-                                               //---------------below this line we're checking that the arguments are OK
+  if (strcmp(command, "gettropplane") == 0) { // run trop plane getter
+                                              // ---------------below this line we're checking that the arguments are OK
     if (argc != 7) {
       cout << "gettropplane expects 5 arguments.\n";
       cout << "1: Input file in .vti format\n";
@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
     cube.writetropplane(argv[6], tropplane);
     return 0;
   }
-  else if (strcmp(command, "splitgrid") == 0) {  //run gridsplitter
+  else if (strcmp(command, "splitgrid") == 0) { // run gridsplitter
 
     if (argc != 6) {
       cout << "splitgrid expects 4 arguments.\n";
@@ -124,9 +124,9 @@ int main(int argc, char** argv) {
     cube.splitgrid(argv[4], argv[5], dir);
     return 0;
   }
-  else if (strcmp(command, "traj") == 0) {  //this gets the trajectory at a given point and outputs it in a format that can be visualized in Mathematica
-                                            //this is for debugging purposes mostly
-                                            //no command line argument error handling has been implemented yet, but one could pretty much copy-paste that from above
+  else if (strcmp(command, "traj") == 0) { // this gets the trajectory at a given point and outputs it in a format that can be visualized in Mathematica
+                                           // this is for debugging purposes mostly
+                                           // no command line argument error handling has been implemented yet, but one could pretty much copy-paste that from above
     Cube cube(argv[2]);
     const coord3d origin(cube.get_origin());
     const coord3d spacing(cube.get_spacing());

@@ -11,7 +11,7 @@
 using namespace std;
 
 
-bool Trajectory::extend_euler(const Cube& cube) {  // Euler
+bool Trajectory::extend_euler(const Cube& cube) { // Euler
   const coord3d nextposition(positions.back() + directions.back().normalised() * step_length);
   auto optvect = cube.getvector(nextposition);
   if (!optvect)
@@ -57,7 +57,7 @@ void Trajectory::complete(const Cube& cube, double return_ratio) {
   // step_length = step_length_ratio * cube.get_spacing()[0];
   int max_steps = 10000;
 
-  double dist2farthest = -1;  // if this is set at 0 at declaration, the following while loop will never run
+  double dist2farthest = -1; // if this is set at 0 at declaration, the following while loop will never run
   if (positions.size() > 1) {
     for (auto pos: positions)
       dist2farthest = std::max(dist2farthest, (pos - positions[0]).norm());
