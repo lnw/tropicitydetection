@@ -254,7 +254,7 @@ void Cube::splitgrid(string gridfile, string weightfile, Direction bfielddir) co
 // direction perpendicular to it (fixeddir), and the offset with respect to
 // that coordinate (fixedcoord).  The plane covers the whole crosssection of
 // the cube.
-Plane<Tropicity> Cube::gettropplane(Direction bfielddir, int fixeddir, double fixedcoord, bool debug) const {
+Plane<Tropicity> Cube::gettropplane(Direction bfielddir, int fixeddir, double fixedcoord_abs, bool debug) const {
   // assert(bfielddir >= 0 && bfielddir <= 5);
   assert(fixeddir >= 0 && fixeddir <= 2);
 #if 0
@@ -264,69 +264,29 @@ Plane<Tropicity> Cube::gettropplane(Direction bfielddir, int fixeddir, double fi
   double steplength = step_length_ratio * get_spacing()[0];
 #endif
   if (fixeddir == 2) {
-    Plane<Tropicity> tropplane(n_x, n_y);
-    fixedcoord = (fixedcoord - origin[2]) / spacing[2];
-    /// fixedcoord should probably be scaled (according to the .vti header (the gimic outputfile spacing)) at the very first line of this function!
+    double fixedcoord = (fixedcoord_abs - origin[2]) / spacing[2];
+    vector<coord3d> coords(n_x * n_y);
     for (int y = 0; y < n_y; y++) {
-      if (debug)
-        cout << "y = " << y << "/" << n_y << endl;
       for (int x = 0; x < n_x; x++) {
-        auto optvect = getvector(coord3d(x, y, fixedcoord));
-        if (!optvect) {
-          tropplane(x, y) = Tropicity::outofbounds;
-          continue;
-        }
-        Trajectory traj(coord3d(x, y, fixedcoord), optvect.value(), steplength);
-        traj.complete(*this);
-        const Tropicity tr = traj.classify(bfielddir);
-        assert(tr != Tropicity::input_error);
-        tropplane(x, y) = tr;
+        coords[y * n_x + x] = coord3d(x, y, fixedcoord);
       }
     }
-    return tropplane;
+    std::vector<Tropicity> tropicities = classify_points(coords, bfielddir);
+    return Plane<Tropicity>(n_x, n_y, tropicities);
   }
   else if (fixeddir == 1) {
-    Plane<Tropicity> tropplane(n_z, n_x);
-    fixedcoord = (fixedcoord - origin[1]) / spacing[1];
+    double fixedcoord = (fixedcoord_abs - origin[1]) / spacing[1];
+    vector<coord3d> coords(n_z * n_x);
     for (int x = 0; x < n_x; x++) {
-      if (debug)
-        cout << "x = " << x << "/" << n_x << endl;
       for (int z = 0; z < n_z; z++) {
-        auto optvect = getvector(coord3d(x, fixedcoord, z));
-        if (!optvect) {
-          tropplane(z, x) = Tropicity::outofbounds;
-          continue;
-        }
-        Trajectory traj(coord3d(x, fixedcoord, z), optvect.value(), steplength);
-        traj.complete(*this);
-        const Tropicity tr = traj.classify(bfielddir);
-        assert(tr != Tropicity::input_error);
-        tropplane(z, x) = tr;
+        coords[x * n_z + z] = coord3d(x, fixedcoord, z);
       }
     }
-    return tropplane;
+    std::vector<Tropicity> tropicities = classify_points(coords, bfielddir);
+    return Plane<Tropicity>(n_z, n_x, tropicities);
   }
   else if (fixeddir == 0) {
-    fixedcoord = (fixedcoord - origin[0]) / spacing[0];
-#if 1
-    Plane<Tropicity> tropplane(n_y, n_z);
-    for (int z = 0; z < n_z; z++) {
-      if (debug)
-        cout << "z = " << z << "/" << n_z << endl;
-      for (int y = 0; y < n_y; y++) {
-        auto optvect = getvector(coord3d(fixedcoord, y, z));
-        if (!optvect) {
-          tropplane(y, z) = Tropicity::outofbounds;
-          continue;
-        }
-        Trajectory traj(coord3d(fixedcoord, y, z), optvect.value(), steplength);
-        traj.complete(*this);
-        const Tropicity tr = traj.classify(bfielddir);
-        assert(tr != Tropicity::input_error);
-        tropplane(y, z) = tr;
-      }
-    }
-#else
+    double fixedcoord = (fixedcoord_abs - origin[0]) / spacing[0];
     vector<coord3d> coords(n_y * n_z);
     for (int z = 0; z < n_z; z++) {
       for (int y = 0; y < n_y; y++) {
@@ -334,9 +294,7 @@ Plane<Tropicity> Cube::gettropplane(Direction bfielddir, int fixeddir, double fi
       }
     }
     std::vector<Tropicity> tropicities = classify_points(coords, bfielddir);
-    Plane<Tropicity> tropplane(n_y, n_z, tropicities);
-#endif
-    return tropplane;
+    return Plane<Tropicity>(n_y, n_z, tropicities);
   }
   assert(false);
 }
