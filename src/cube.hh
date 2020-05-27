@@ -37,8 +37,11 @@ public:
 
   constexpr coord3d get_origin() const { return origin; }
   constexpr coord3d get_spacing() const { return spacing; }
-  constexpr bool outofbounds(const coord3d& position) const { // where position is in 'cube coordinates', ie, with origin 0, 0, 0, and unit-spacing
-    if (position[0] > n_x || position[1] > n_y || position[2] > n_z || position[0] < 0 || position[1] < 0 || position[2] < 0) {
+
+  // where position is in 'cube coordinates', ie, with origin 0, 0, 0, and unit-spacing
+  // here we're excluding n_x-1 etc, even though we have values for those coordinates, because one cannot interpolate there, and making the destinction is expensive/not very useful
+  constexpr bool outofbounds(const coord3d& position) const {
+    if (position[0] >= n_x-1 || position[1] >= n_y-1 || position[2] >= n_z-1 || position[0] < 0 || position[1] < 0 || position[2] < 0) {
       return true;
     }
     return false;
@@ -46,8 +49,8 @@ public:
 
   std::vector<Tropicity> classify_points(const std::vector<coord3d>& coords, Direction bfielddir) const;
 
-  Plane<Tropicity> gettropplaneZ(double zcoord) const;
-  Plane<Tropicity> gettropplane(Direction bfielddir, int fixeddir, double fixedcoord) const;
+  Plane<Tropicity> gettropplaneZ(double zcoord, bool debug) const;
+  Plane<Tropicity> gettropplane(Direction bfielddir, int fixeddir, double fixedcoord, bool debug) const;
   void splitgrid(std::string gridfile, std::string weightfile, Direction bfielddir) const;
 
   std::optional<coord3d> getvector(coord3d position) const;

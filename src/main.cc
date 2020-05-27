@@ -89,7 +89,8 @@ int main(int argc, char** argv) {
 
     Direction dir(to_direction(stoi(argv[3])));
     Cube cube(argv[2]);
-    Plane<Tropicity> tropplane = cube.gettropplane(dir, stoi(argv[4]), stod(argv[5]));
+    bool debug = true;
+    Plane<Tropicity> tropplane = cube.gettropplane(dir, stoi(argv[4]), stod(argv[5]), debug);
     cube.writetropplane(argv[6], tropplane);
     return 0;
   }

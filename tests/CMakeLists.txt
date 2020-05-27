@@ -31,9 +31,11 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
 endif()
 
 set(testsources
-    interpolation.cc
-    tropicityclassification.cc
-    completetrajectory.cc)
+    interpolationtests.cc
+    tropicityclassificationtests.cc
+    classifyplanetests.cc
+    completetrajectorytests.cc
+)
 
 add_executable(tropicity_tests ${testsources})
 target_link_libraries(tropicity_tests trop gtest_main)
