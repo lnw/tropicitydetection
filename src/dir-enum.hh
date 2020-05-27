@@ -2,12 +2,12 @@
 
 #include <cassert>
 
-enum class Direction : unsigned short { pos_x = 0,
-                                        neg_x,
-                                        pos_y,
-                                        neg_y,
-                                        pos_z,
-                                        neg_z };
+enum class Direction : short { pos_x = 0,
+                               neg_x,
+                               pos_y,
+                               neg_y,
+                               pos_z,
+                               neg_z };
 
 
 inline Direction to_direction(int i) {

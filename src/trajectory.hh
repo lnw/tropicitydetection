@@ -28,7 +28,7 @@ public:
   const vector<coord3d>& get_positions() const { return positions; }
   const vector<coord3d>& get_directions() const { return directions; }
   double get_step_length() const { return step_length; }
-  void get_step_length(double step) { step_length = step; }
+  void set_step_length(double step) { step_length = step; }
   size_t size() const { return positions.size(); }
 
   void append(const coord3d& pos, const coord3d& dir) {

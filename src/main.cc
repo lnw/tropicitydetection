@@ -9,6 +9,7 @@
 #include "cube.hh"
 #include "dir-enum.hh"
 #include "geometry3.hh"
+#include "plane.hh"
 #include "trajectory.hh"
 #include "trop-enum.hh"
 
@@ -88,7 +89,7 @@ int main(int argc, char** argv) {
 
     Direction dir(to_direction(stoi(argv[3])));
     Cube cube(argv[2]);
-    vector<vector<Tropicity>> tropplane = cube.gettropplane(dir, stoi(argv[4]), stod(argv[5]));
+    Plane<Tropicity> tropplane = cube.gettropplane(dir, stoi(argv[4]), stod(argv[5]));
     cube.writetropplane(argv[6], tropplane);
     return 0;
   }
