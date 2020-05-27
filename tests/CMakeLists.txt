@@ -31,10 +31,11 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
 endif()
 
 set(testsources
+    classifyplanetests.cc
+    cudacardfound.cc
+    completetrajectorytests.cc
     interpolationtests.cc
     tropicityclassificationtests.cc
-    classifyplanetests.cc
-    completetrajectorytests.cc
 )
 
 add_executable(tropicity_tests ${testsources})

@@ -30,7 +30,7 @@ PYBIND11_PLUGIN(libtropicity) {
       .def("splitgrid", &Cube::splitgrid);    // string, string, int
 
   // class trajectory
-  py::class_<trajectory>(mod, "trajectory")
+  py::class_<Trajectory>(mod, "trajectory")
       .def(py::init<coord3d, coord3d, float>());
 
 

@@ -8,17 +8,19 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_VERBOSE_MAKEFILE FALSE)
 # set(CMAKE_CXX_CLANG_TIDY clang-tidy)
 
-if(NOT WITH_PYTHON)
-  SET(WITH_PYTHON FALSE)
-else()
-  SET(WITH_PYTHON TRUE)
-endif()
+option(ENABLE_PYTHON  "enable building the python interface"  OFF)
+option(ENABLE_CUDA    "enable CUDA"                           OFF)
+# if(NOT WITH_PYTHON)
+#   SET(WITH_PYTHON FALSE)
+# else()
+#   SET(WITH_PYTHON TRUE)
+# endif()
 
 if(NOT DEFINED CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE "release")
 endif()
 
-if(WITH_PYTHON)
+if(ENABLE_PYTHON)
   if(CMAKE_VERSION VERSION_LESS "3.12.0")
     # find_package(PythonInterp 3.0 REQUIRED)
     find_package(PythonLibs 3.0 REQUIRED)
@@ -29,16 +31,56 @@ if(WITH_PYTHON)
   endif()
 endif()
 
+
+if(ENABLE_CUDA)
+    find_package(CUDA REQUIRED)
+    if(CUDA_FOUND)
+        add_definitions(-DHAVE_CUDA)
+        include_directories(${CUDA_INCLUDE_DIRS})
+        message("Cuda include directories ${CUDA_INCLUDE_DIRS}")
+        message("Cuda libraries ${CUDA_CUBLAS_LIBRARIES} ${CUDA_LIBRARIES}")
+        set(LIBS ${LIBS} ${CUDA_CUBLAS_LIBRARIES} ${CUDA_LIBRARIES})
+        if (ENABLE_CUDA_PROFILING)
+            set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -lineinfo --ptxas-options;-v)
+            add_definitions(-DHAVE_CUDA_PROFILING)
+        endif()
+    #    if (ENABLE_NVTX)
+    #        set(F2PY_LIBS "${F2PY_LIBS} -lnvToolsExt")
+    #        add_definitions(-DHAVE_NVTX)
+    #    endif()
+        set(CUDA_NVCC_ARCH "52;60"
+            CACHE STRING
+            "List of CUDA Compute capability (35, 37, 60 for 3.5, 3.7, 6.0, respectively)"
+            )
+        foreach (ARCH ${CUDA_NVCC_ARCH})
+            set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}
+                        "-gencode arch=compute_${ARCH},code=sm_${ARCH}"
+                        )
+        endforeach()
+
+        set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}
+                        "-I${CMAKE_INSTALL_PREFIX}/include/"
+                        )
+
+        message("cuda nvcc flags ${CUDA_NVCC_FLAGS}")
+  #       message(WARNING "
+  #       >> Remember to set CUDA_HOST_COMPILER to the correct version
+  #       (e.g. gcc <= 4.6 for CUDA 5.0)")
+    endif()
+endif ()
+
+
 SET(CMAKE_CXX_FLAGS "-fPIC")
 SET(CMAKE_CXX_FLAGS_RELEASE "-O3")
-SET(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -Wall -Wunused -Wpedantic")
+SET(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -Wall -Wshadow -Wunused -Wpedantic")
 
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
   SET(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR})
 endif()
 
-message(STATUS "with python: " ${WITH_PYTHON} )
-message(STATUS "build type: " ${CMAKE_BUILD_TYPE} )
+message(STATUS "enable python: " ${ENABLE_PYTHON} )
+message(STATUS "enable CUDA: "   ${ENABLE_CUDA} )
+message(STATUS "build type: "    ${CMAKE_BUILD_TYPE} )
 
 add_subdirectory(src)
 add_subdirectory(tests)

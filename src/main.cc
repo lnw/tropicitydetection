@@ -5,7 +5,7 @@
 #include <iostream>
 #include <vector>
 
-#include "configuration.hh"
+// #include "configuration.hh"
 #include "cube.hh"
 #include "dir-enum.hh"
 #include "geometry3.hh"
@@ -13,6 +13,7 @@
 #include "trajectory.hh"
 #include "trop-enum.hh"
 
+#include "gpu-info.hh"
 
 using namespace std;
 

@@ -180,8 +180,8 @@ void Cube::splitgrid(string gridfile, string weightfile, Direction bfielddir) co
       zero_points.push_back(gridpoints_str[i]);
       zero_weights.push_back(gridweights_str[i]);
       ostringstream vectr;
-      auto optvect = getvector(gridpoints[i]);
-      assert(optvect);
+      // auto optvect = getvector(gridpoints[i]);
+      // assert(optvect);
       vectr << to_string(optvect.value()[0]) << "," << to_string(optvect.value()[2]) << "," << to_string(optvect.value()[2]);
       zero_intensities.push_back(vectr.str());
     }
@@ -189,8 +189,8 @@ void Cube::splitgrid(string gridfile, string weightfile, Direction bfielddir) co
       zero_points.push_back(gridpoints_str[i]);
       zero_weights.push_back(gridweights_str[i]);
       ostringstream vectr;
-      auto optvect = getvector(gridpoints[i]);
-      assert(optvect);
+      // auto optvect = getvector(gridpoints[i]);
+      // assert(optvect);
       vectr << to_string(optvect.value()[0]) << "," << to_string(optvect.value()[2]) << "," << to_string(optvect.value()[2]);
       vectr << "\t@\t" << gridpoints_str[i];
       zero_intensities.push_back(vectr.str());
@@ -255,14 +255,7 @@ void Cube::splitgrid(string gridfile, string weightfile, Direction bfielddir) co
 // that coordinate (fixedcoord).  The plane covers the whole crosssection of
 // the cube.
 Plane<Tropicity> Cube::gettropplane(Direction bfielddir, int fixeddir, double fixedcoord_abs, bool debug) const {
-  // assert(bfielddir >= 0 && bfielddir <= 5);
   assert(fixeddir >= 0 && fixeddir <= 2);
-#if 0
-  double steplength = 0.01;
-#else
-  double step_length_ratio = 0.05;
-  double steplength = step_length_ratio * get_spacing()[0];
-#endif
   if (fixeddir == 2) {
     double fixedcoord = (fixedcoord_abs - origin[2]) / spacing[2];
     vector<coord3d> coords(n_x * n_y);
