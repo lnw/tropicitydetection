@@ -13,7 +13,9 @@
 #include "trajectory.hh"
 #include "trop-enum.hh"
 
+#if HAVE_CUDA
 #include "gpu-info.hh"
+#endif
 
 using namespace std;
 

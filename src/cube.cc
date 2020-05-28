@@ -7,6 +7,10 @@
 #include <regex>
 #include <vector>
 
+#if HAVE_OMP
+#include <omp.h>
+#endif
+
 #include "cube.hh"
 #include "geometry3.hh"
 #include "plane.hh"
@@ -330,6 +334,7 @@ std::vector<Tropicity> Cube::classify_points(const std::vector<coord3d>& coords,
   double steplength = step_length_ratio * get_spacing()[0];
 #endif
 
+#pragma omp parallel for
   for (int64_t i = 0; i < n_points; i++) {
     auto optvect = getvector(coords[i]);
     if (!optvect) {

@@ -32,11 +32,15 @@ endif()
 
 set(testsources
     classifyplanetests.cc
-    cudacardfound.cc
     completetrajectorytests.cc
     interpolationtests.cc
     tropicityclassificationtests.cc
 )
+if(CUDA_FOUND)
+    set(testsources ${testsources}
+        cudacardfound.cc
+       )
+endif()
 
 add_executable(tropicity_tests ${testsources})
 target_link_libraries(tropicity_tests trop gtest_main)

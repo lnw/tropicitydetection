@@ -10,11 +10,7 @@ set(CMAKE_VERBOSE_MAKEFILE FALSE)
 
 option(ENABLE_PYTHON  "enable building the python interface"  OFF)
 option(ENABLE_CUDA    "enable CUDA"                           OFF)
-# if(NOT WITH_PYTHON)
-#   SET(WITH_PYTHON FALSE)
-# else()
-#   SET(WITH_PYTHON TRUE)
-# endif()
+option(ENABLE_OMP     "enable OpenMP"                         OFF)
 
 if(NOT DEFINED CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE "release")
@@ -70,16 +66,21 @@ if(ENABLE_CUDA)
 endif ()
 
 
-SET(CMAKE_CXX_FLAGS "-fPIC")
-SET(CMAKE_CXX_FLAGS_RELEASE "-O3")
-SET(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -Wall -Wshadow -Wunused -Wpedantic")
+set(CMAKE_CXX_FLAGS "-fPIC")
+if(ENABLE_OMP)
+    set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -fopenmp")
+    add_definitions(-DHAVE_OMP)
+endif()
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -Wall -Wshadow -Wunused -Wpedantic")
 
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  SET(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR})
+  set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR})
 endif()
 
 message(STATUS "enable python: " ${ENABLE_PYTHON} )
 message(STATUS "enable CUDA: "   ${ENABLE_CUDA} )
+message(STATUS "enable OpenMP: " ${ENABLE_OMP} )
 message(STATUS "build type: "    ${CMAKE_BUILD_TYPE} )
 
 add_subdirectory(src)
