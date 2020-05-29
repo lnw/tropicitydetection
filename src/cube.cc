@@ -324,7 +324,7 @@ void Cube::writecube(const string& filename) const {
 }
 
 
-std::vector<Tropicity> Cube::classify_points(const std::vector<coord3d>& coords, Direction bfielddir) const {
+std::vector<Tropicity> Cube::classify_points_cpu(const std::vector<coord3d>& coords, Direction bfielddir) const {
   int64_t n_points = coords.size();
   std::vector<Tropicity> tropicities(n_points);
 #if 0
@@ -334,7 +334,9 @@ std::vector<Tropicity> Cube::classify_points(const std::vector<coord3d>& coords,
   double steplength = step_length_ratio * get_spacing()[0];
 #endif
 
+#if HAVE_OMP
 #pragma omp parallel for
+#endif
   for (int64_t i = 0; i < n_points; i++) {
     auto optvect = getvector(coords[i]);
     if (!optvect) {

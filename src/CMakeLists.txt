@@ -8,6 +8,7 @@ set(SOURCES
 if(CUDA_FOUND)
     set(SOURCES ${SOURCES}
         gpu-info.cu
+        cube.cu
        )
     cuda_add_library(trop STATIC ${SOURCES})
     set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS})

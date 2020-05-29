@@ -122,7 +122,7 @@ Tropicity Trajectory::classify(Direction bfielddir) const {
     return Tropicity::outofbounds;
 
   coord3d crossum(0, 0, 0);
-  const size_t polygon_size(directions.size());
+  const size_t polygon_size(positions.size());
   for (size_t i = 0; i < polygon_size; i++) {
     crossum += positions[(i - 1 + polygon_size) % polygon_size].cross(positions[i]);
   }

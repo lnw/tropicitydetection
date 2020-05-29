@@ -15,7 +15,7 @@ public:
   const double epsilon = 1.e-6;
 };
 
-
+#if HAVE_CUDA
 TEST_F(CudaCardFoundTest, anydevice) {
 
   int devCount = number_cuda_devices();
@@ -35,3 +35,5 @@ TEST_F(CudaCardFoundTest, ccminimum) {
   int devCount = number_cuda_devices_minimum_cc(30); // at least one card with at least CUDA 3.0
   ASSERT_GE(devCount, 1);
 }
+
+#endif

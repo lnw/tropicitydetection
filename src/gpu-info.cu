@@ -48,17 +48,15 @@ void print_device_props_complete() {
   }
 }
 
-int number_cuda_devices() {
-  const size_t kb = 1024;
-  const size_t mb = kb * kb;
 
+int number_cuda_devices() {
   int devCount;
   cudaGetDeviceCount(&devCount);
   return devCount;
 }
 
 
-int number_cuda_devices_minimum_mem_mb(int min_mem) {
+int number_cuda_devices_minimum_mem_mb(size_t min_mem) {
   const size_t kb = 1024;
   const size_t mb = kb * kb;
 
@@ -68,7 +66,8 @@ int number_cuda_devices_minimum_mem_mb(int min_mem) {
   for (int i = 0; i < devCount; ++i) {
     cudaDeviceProp props;
     cudaGetDeviceProperties(&props, i);
-    if( props.totalGlobalMem / mb >= min_mem) count++;
+    if (props.totalGlobalMem / mb >= min_mem)
+      count++;
   }
 
   return count;
@@ -76,17 +75,14 @@ int number_cuda_devices_minimum_mem_mb(int min_mem) {
 
 
 int number_cuda_devices_minimum_cc(int min_cc) {
-  const size_t kb = 1024;
-  const size_t mb = kb * kb;
-
   int devCount;
   int count = 0;
   cudaGetDeviceCount(&devCount);
   for (int i = 0; i < devCount; ++i) {
     cudaDeviceProp props;
     cudaGetDeviceProperties(&props, i);
-    if( props.major *10 +  props.minor >= min_cc)
-count++;
+    if (props.major * 10 + props.minor >= min_cc)
+      count++;
   }
 
   return count;

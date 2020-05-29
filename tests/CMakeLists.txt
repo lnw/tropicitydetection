@@ -39,6 +39,7 @@ set(testsources
 if(CUDA_FOUND)
     set(testsources ${testsources}
         cudacardfound.cc
+        cudainterpolationtests.cc
        )
 endif()
 
