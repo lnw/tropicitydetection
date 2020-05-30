@@ -17,7 +17,7 @@ void print_device_props_short() {
     cudaGetDeviceProperties(&props, i);
     printf("  | %d: %s\n", i, props.name);
     printf("  | arch version / compute capability: %d.%d\n", props.major, props.minor);
-    printf("  | Global memory: %d MB\n", props.totalGlobalMem / mb);
+    printf("  | Global memory: %zu MB\n", props.totalGlobalMem / mb);
   }
 }
 
@@ -35,12 +35,12 @@ void print_device_props_complete() {
     cudaGetDeviceProperties(&props, i);
     printf("  | %d: %s\n", i, props.name);
     printf("  | arch version / compute capability: %d.%d\n", props.major, props.minor);
-    printf("  | global memory: %d MB\n", props.totalGlobalMem / mb);
-    printf("  | shared memory: %d KB\n", props.sharedMemPerBlock / kb);
-    printf("  | constant memory: %d KB\n", props.totalConstMem / kb);
+    printf("  | global memory: %zu MB\n", props.totalGlobalMem / mb);
+    printf("  | shared memory: %zu KB\n", props.sharedMemPerBlock / kb);
+    printf("  | constant memory: %zu KB\n", props.totalConstMem / kb);
     printf("  | 32b-registers per block: %d\n", props.regsPerBlock);
     printf("  | warp size: %d\n", props.warpSize);
-    printf("  | max pitch: %d KB\n", props.memPitch / kb);
+    printf("  | max pitch: %zu KB\n", props.memPitch / kb);
     printf("  | threads per block: %d\n", props.maxThreadsPerBlock);
     printf("  | max block dimensions: %d, %d, %d\n", props.maxThreadsDim[0], props.maxThreadsDim[1], props.maxThreadsDim[2]);
     printf("  | max grid dimensions: %d, %d, %d\n", props.maxGridSize[0], props.maxGridSize[1], props.maxGridSize[2]);

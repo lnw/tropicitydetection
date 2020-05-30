@@ -12,7 +12,7 @@
 #include "trop-enum.hh"
 
 
-std::vector<Tropicity> classify_points_cudax(const std::vector<coord3d>& field, int nx, int ny, int nz, coord3d origin, coord3d spacing, const std::vector<coord3d>& coords, Direction bfielddir);
+std::vector<Tropicity> classify_points_cudax(const double* field, int64_t nx, int64_t ny, int64_t nz, double* origin, double* spacing, const double* coords, int32_t n_points, Direction bfielddir);
 
 
 class Cube {
@@ -53,7 +53,29 @@ public:
   }
 
   std::vector<Tropicity> classify_points_cuda(const std::vector<coord3d>& coords, Direction bfielddir) const {
-    return classify_points_cudax(field, n_x, n_y, n_z, origin, spacing, coords, bfielddir);
+    double* field_a = new double[3 * field.size()];
+    for (size_t i = 0; i < field.size(); i++) {
+      field_a[3 * i + 0] = field[i][0];
+      field_a[3 * i + 1] = field[i][1];
+      field_a[3 * i + 2] = field[i][2];
+    }
+    double* origin_a = new double[3];
+    for (int i; i < 3; i++)
+      origin_a[i] = origin[i];
+    double* spacing_a = new double[3];
+    for (int i; i < 3; i++)
+      spacing_a[i] = spacing[i];
+    double* coords_a = new double[3 * coords.size()];
+    for (size_t i = 0; i < coords.size(); i++) {
+      coords_a[3 * i + 0] = coords[i][0];
+      coords_a[3 * i + 1] = coords[i][1];
+      coords_a[3 * i + 2] = coords[i][2];
+    }
+    return classify_points_cudax(field_a, n_x, n_y, n_z, origin_a, spacing_a, coords_a, coords.size(), bfielddir);
+    delete[] field_a;
+    delete[] origin_a;
+    delete[] spacing_a;
+    delete[] coords_a;
   }
 
   std::vector<Tropicity> classify_points_cpu(const std::vector<coord3d>& coords, Direction bfielddir) const;

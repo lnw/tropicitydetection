@@ -31,3 +31,4 @@ if(ENABLE_PYTHON)
   install(TARGETS tropicity DESTINATION lib)
   install(FILES splitgrid.py assign_plane.py DESTINATION bin)
 endif()
+
