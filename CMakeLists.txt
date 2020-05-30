@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 project(tropicity)
 enable_language(CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 set(CMAKE_VERBOSE_MAKEFILE FALSE)
@@ -55,8 +55,8 @@ if(ENABLE_CUDA)
         endforeach()
 
         set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}
-                        "-I${CMAKE_INSTALL_PREFIX}/include/"
-                        )
+                        "--expt-relaxed-constexpr -I${CMAKE_INSTALL_PREFIX}/include/"
+           )
 
         message("cuda nvcc flags ${CUDA_NVCC_FLAGS}")
   #       message(WARNING "
@@ -68,11 +68,11 @@ endif ()
 
 set(CMAKE_CXX_FLAGS "-fPIC")
 if(ENABLE_OMP)
-    set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -fopenmp")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
     add_definitions(-DHAVE_OMP)
 endif()
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -Wall -Wshadow -Wunused -Wpedantic")
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -Wall -Wshadow -Wunused")
 
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
   set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR})

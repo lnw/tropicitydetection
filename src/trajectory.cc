@@ -14,9 +14,9 @@ using namespace std;
 bool Trajectory::extend_euler(const Cube& cube) { // Euler
   const coord3d nextposition(positions.back() + directions.back().normalised() * step_length);
   auto optvect = cube.getvector(nextposition);
-  if (!optvect)
+  if (!std::get<0>(optvect))
     return false;
-  append(nextposition, cube.getvector(nextposition).value());
+  append(nextposition, std::get<1>(cube.getvector(nextposition)));
   return true;
 }
 
@@ -24,27 +24,27 @@ bool Trajectory::extend_euler(const Cube& cube) { // Euler
 // Runge-Kutta method, 4th order
 bool Trajectory::extend_rungekutta(const Cube& cube) {
   const coord3d c0 = positions.back();
-  const coord3d k0 = cube.getvector(c0).value().normalised() * step_length;
+  const coord3d k0 = std::get<1>(cube.getvector(c0)).normalised() * step_length;
   const coord3d c1 = c0 + k0 * 0.5;
   auto v1 = cube.getvector(c1);
-  if (!v1)
+  if (!std::get<0>(v1))
     return false;
-  const coord3d k1 = v1.value().normalised() * step_length;
+  const coord3d k1 = std::get<1>(v1).normalised() * step_length;
   const coord3d c2 = c0 + k1 * 0.5;
   auto v2 = cube.getvector(c2);
-  if (!v2)
+  if (!std::get<0>(v2))
     return false;
-  const coord3d k2 = v2.value().normalised() * step_length;
+  const coord3d k2 = std::get<1>(v2).normalised() * step_length;
   const coord3d c3 = c0 + k2;
   auto v3 = cube.getvector(c3);
-  if (!v3)
+  if (!std::get<0>(v3))
     return false;
-  const coord3d k3 = v3.value().normalised() * step_length;
+  const coord3d k3 = std::get<1>(v3).normalised() * step_length;
   const coord3d c4 = c0 + (k0 + k1 * 2.0 + k2 * 2.0 + k3) / 6.0;
   auto v4 = cube.getvector(c4);
-  if (!v4)
+  if (!std::get<0>(v4))
     return false;
-  append(c4, v4.value());
+  append(c4, std::get<1>(v4));
   return true;
 }
 

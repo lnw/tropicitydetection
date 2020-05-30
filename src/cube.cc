@@ -3,7 +3,7 @@
 #include <iostream>
 #include <iterator>
 #include <list>
-#include <optional>
+// #include <optional>
 #include <regex>
 #include <vector>
 
@@ -73,9 +73,9 @@ Cube::Cube(string filename) {
 
 
 // trilinear interpolation
-std::optional<coord3d> Cube::getvector(coord3d position) const {
+std::tuple<bool, coord3d> Cube::getvector(coord3d position) const {
   if (outofbounds(position))
-    return {};
+    return make_tuple(false, coord3d());
 
   double x = position[0];
   double y = position[1];
@@ -101,7 +101,7 @@ std::optional<coord3d> Cube::getvector(coord3d position) const {
   coord3d aux4 = (y1 - y) * aux0 + (y - y0) * aux1;
   coord3d aux5 = (y1 - y) * aux2 + (y - y0) * aux3;
   coord3d res = (z1 - z) * aux4 + (z - z0) * aux5;
-  return res;
+  return make_tuple(true, res);
 }
 
 
@@ -157,14 +157,14 @@ void Cube::splitgrid(string gridfile, string weightfile, Direction bfielddir) co
 
   for (size_t i = 0; i < gridpoints.size(); i++) {
     auto optvect = getvector(gridpoints[i]);
-    assert(optvect);
+    assert(std::get<0>(optvect));
 #if 0
   double steplength = 0.01;
 #else
     double step_length_ratio = 0.05;
     double steplength = step_length_ratio * get_spacing()[0];
 #endif
-    Trajectory traj(gridpoints[i], optvect.value(), steplength);
+    Trajectory traj(gridpoints[i], std::get<1>(optvect), steplength);
     if (i % 100 == 0) {
       cout << "i=" << i << "/" << gridpoints.size() << "\n";
     }
@@ -186,7 +186,7 @@ void Cube::splitgrid(string gridfile, string weightfile, Direction bfielddir) co
       ostringstream vectr;
       // auto optvect = getvector(gridpoints[i]);
       // assert(optvect);
-      vectr << to_string(optvect.value()[0]) << "," << to_string(optvect.value()[2]) << "," << to_string(optvect.value()[2]);
+      vectr << to_string(std::get<1>(optvect)[0]) << "," << to_string(std::get<1>(optvect)[1]) << "," << to_string(std::get<1>(optvect)[2]);
       zero_intensities.push_back(vectr.str());
     }
     else if (classification == Tropicity::unclassifyable) {
@@ -195,7 +195,8 @@ void Cube::splitgrid(string gridfile, string weightfile, Direction bfielddir) co
       ostringstream vectr;
       // auto optvect = getvector(gridpoints[i]);
       // assert(optvect);
-      vectr << to_string(optvect.value()[0]) << "," << to_string(optvect.value()[2]) << "," << to_string(optvect.value()[2]);
+      vectr << to_string(std::get<1>(optvect)[0]) << "," << to_string(std::get<1>(optvect)[1]) << "," << to_string(std::get<1>(optvect)[2]);
+      // vectr << to_string(optvect.value()[0]) << "," << to_string(optvect.value()[2]) << "," << to_string(optvect.value()[2]);
       vectr << "\t@\t" << gridpoints_str[i];
       zero_intensities.push_back(vectr.str());
       //cout<<"couldn't classify this point :o(\n";
@@ -339,11 +340,11 @@ std::vector<Tropicity> Cube::classify_points_cpu(const std::vector<coord3d>& coo
 #endif
   for (int64_t i = 0; i < n_points; i++) {
     auto optvect = getvector(coords[i]);
-    if (!optvect) {
+    if (!std::get<0>(optvect)) {
       tropicities[i] = Tropicity::outofbounds;
       continue;
     }
-    Trajectory traj(coords[i], optvect.value(), steplength);
+    Trajectory traj(coords[i], std::get<1>(optvect), steplength);
     traj.complete(*this);
     tropicities[i] = traj.classify(bfielddir);
   }

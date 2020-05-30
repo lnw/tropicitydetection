@@ -22,52 +22,52 @@ TEST_F(InterpolationTest, iscontinuous) {
   }
 
   // continuous across centre of face x
-  ASSERT_NEAR(cube.getvector(1.0 - epsilon, 0.5, 0.5).value()[0],
-              cube.getvector(1.0 + epsilon, 0.5, 0.5).value()[0], 3 * epsilon);
-  ASSERT_NEAR(cube.getvector(1.0 - epsilon, 0.5, 0.5).value()[1],
-              cube.getvector(1.0 + epsilon, 0.5, 0.5).value()[1], 3 * epsilon);
-  ASSERT_NEAR(cube.getvector(1.0 - epsilon, 0.5, 0.5).value()[2],
-              cube.getvector(1.0 + epsilon, 0.5, 0.5).value()[2], 3 * epsilon);
+  ASSERT_NEAR(std::get<1>(cube.getvector(1.0 - epsilon, 0.5, 0.5))[0],
+              std::get<1>(cube.getvector(1.0 + epsilon, 0.5, 0.5))[0], 3 * epsilon);
+  ASSERT_NEAR(std::get<1>(cube.getvector(1.0 - epsilon, 0.5, 0.5))[1],
+              std::get<1>(cube.getvector(1.0 + epsilon, 0.5, 0.5))[1], 3 * epsilon);
+  ASSERT_NEAR(std::get<1>(cube.getvector(1.0 - epsilon, 0.5, 0.5))[2],
+              std::get<1>(cube.getvector(1.0 + epsilon, 0.5, 0.5))[2], 3 * epsilon);
 
   // continuous across centre of face y
-  ASSERT_NEAR(cube.getvector(0.5, 1.0 - epsilon, 0.5).value()[0],
-              cube.getvector(0.5, 1.0 + epsilon, 0.5).value()[0], 3 * epsilon);
-  ASSERT_NEAR(cube.getvector(0.5, 1.0 - epsilon, 0.5).value()[1],
-              cube.getvector(0.5, 1.0 + epsilon, 0.5).value()[1], 3 * epsilon);
-  ASSERT_NEAR(cube.getvector(0.5, 1.0 - epsilon, 0.5).value()[2],
-              cube.getvector(0.5, 1.0 + epsilon, 0.5).value()[2], 3 * epsilon);
+  ASSERT_NEAR(std::get<1>(cube.getvector(0.5, 1.0 - epsilon, 0.5))[0],
+              std::get<1>(cube.getvector(0.5, 1.0 + epsilon, 0.5))[0], 3 * epsilon);
+  ASSERT_NEAR(std::get<1>(cube.getvector(0.5, 1.0 - epsilon, 0.5))[1],
+              std::get<1>(cube.getvector(0.5, 1.0 + epsilon, 0.5))[1], 3 * epsilon);
+  ASSERT_NEAR(std::get<1>(cube.getvector(0.5, 1.0 - epsilon, 0.5))[2],
+              std::get<1>(cube.getvector(0.5, 1.0 + epsilon, 0.5))[2], 3 * epsilon);
 
   // continuous across centre of face z
-  ASSERT_NEAR(cube.getvector(0.5, 0.5, 1.0 - epsilon).value()[0],
-              cube.getvector(0.5, 0.5, 1.0 + epsilon).value()[0], 3 * epsilon);
-  ASSERT_NEAR(cube.getvector(0.5, 0.5, 1.0 - epsilon).value()[1],
-              cube.getvector(0.5, 0.5, 1.0 + epsilon).value()[1], 3 * epsilon);
-  ASSERT_NEAR(cube.getvector(0.5, 0.5, 1.0 - epsilon).value()[2],
-              cube.getvector(0.5, 0.5, 1.0 + epsilon).value()[2], 3 * epsilon);
+  ASSERT_NEAR(std::get<1>(cube.getvector(0.5, 0.5, 1.0 - epsilon))[0],
+              std::get<1>(cube.getvector(0.5, 0.5, 1.0 + epsilon))[0], 3 * epsilon);
+  ASSERT_NEAR(std::get<1>(cube.getvector(0.5, 0.5, 1.0 - epsilon))[1],
+              std::get<1>(cube.getvector(0.5, 0.5, 1.0 + epsilon))[1], 3 * epsilon);
+  ASSERT_NEAR(std::get<1>(cube.getvector(0.5, 0.5, 1.0 - epsilon))[2],
+              std::get<1>(cube.getvector(0.5, 0.5, 1.0 + epsilon))[2], 3 * epsilon);
 
   // continuous across edge xy
-  ASSERT_NEAR(cube.getvector(1.0 - epsilon, 1.0 - epsilon, 0.5).value()[0],
-              cube.getvector(1.0 + epsilon, 1.0 + epsilon, 0.5).value()[0],
+  ASSERT_NEAR(std::get<1>(cube.getvector(1.0 - epsilon, 1.0 - epsilon, 0.5))[0],
+              std::get<1>(cube.getvector(1.0 + epsilon, 1.0 + epsilon, 0.5))[0],
               4 * epsilon);
-  ASSERT_NEAR(cube.getvector(1.0 - epsilon, 1.0 - epsilon, 0.5).value()[1],
-              cube.getvector(1.0 + epsilon, 1.0 + epsilon, 0.5).value()[1],
+  ASSERT_NEAR(std::get<1>(cube.getvector(1.0 - epsilon, 1.0 - epsilon, 0.5))[1],
+              std::get<1>(cube.getvector(1.0 + epsilon, 1.0 + epsilon, 0.5))[1],
               4 * epsilon);
-  ASSERT_NEAR(cube.getvector(1.0 - epsilon, 1.0 - epsilon, 0.5).value()[2],
-              cube.getvector(1.0 + epsilon, 1.0 + epsilon, 0.5).value()[2],
+  ASSERT_NEAR(std::get<1>(cube.getvector(1.0 - epsilon, 1.0 - epsilon, 0.5))[2],
+              std::get<1>(cube.getvector(1.0 + epsilon, 1.0 + epsilon, 0.5))[2],
               4 * epsilon);
 
   // continuous across corner xyz
   ASSERT_NEAR(
-      cube.getvector(1.0 - epsilon, 1.0 - epsilon, 1.0 - epsilon).value()[0],
-      cube.getvector(1.0 + epsilon, 1.0 + epsilon, 1.0 + epsilon).value()[0],
+      std::get<1>(cube.getvector(1.0 - epsilon, 1.0 - epsilon, 1.0 - epsilon))[0],
+      std::get<1>(cube.getvector(1.0 + epsilon, 1.0 + epsilon, 1.0 + epsilon))[0],
       4 * epsilon);
   ASSERT_NEAR(
-      cube.getvector(1.0 - epsilon, 1.0 - epsilon, 1.0 - epsilon).value()[1],
-      cube.getvector(1.0 + epsilon, 1.0 + epsilon, 1.0 + epsilon).value()[1],
+      std::get<1>(cube.getvector(1.0 - epsilon, 1.0 - epsilon, 1.0 - epsilon))[1],
+      std::get<1>(cube.getvector(1.0 + epsilon, 1.0 + epsilon, 1.0 + epsilon))[1],
       4 * epsilon);
   ASSERT_NEAR(
-      cube.getvector(1.0 - epsilon, 1.0 - epsilon, 1.0 - epsilon).value()[2],
-      cube.getvector(1.0 + epsilon, 1.0 + epsilon, 1.0 + epsilon).value()[2],
+      std::get<1>(cube.getvector(1.0 - epsilon, 1.0 - epsilon, 1.0 - epsilon))[2],
+      std::get<1>(cube.getvector(1.0 + epsilon, 1.0 + epsilon, 1.0 + epsilon))[2],
       4 * epsilon);
 }
 
@@ -82,11 +82,11 @@ TEST_F(InterpolationTest, nointerpolation) {
     }
   }
 
-  ASSERT_NEAR(cube.getvector(1, 1, 1).value()[0], cube(1, 1, 1)[0], epsilon);
-  ASSERT_NEAR(cube.getvector(1, 1, 1).value()[1], cube(1, 1, 1)[1], epsilon);
-  ASSERT_NEAR(cube.getvector(1, 1, 1).value()[2], cube(1, 1, 1)[2], epsilon);
+  ASSERT_NEAR(std::get<1>(cube.getvector(1, 1, 1))[0], cube(1, 1, 1)[0], epsilon);
+  ASSERT_NEAR(std::get<1>(cube.getvector(1, 1, 1))[1], cube(1, 1, 1)[1], epsilon);
+  ASSERT_NEAR(std::get<1>(cube.getvector(1, 1, 1))[2], cube(1, 1, 1)[2], epsilon);
 
-  ASSERT_NEAR(cube.getvector(1, 0, 1).value()[0], cube(1, 0, 1)[0], epsilon);
-  ASSERT_NEAR(cube.getvector(1, 0, 1).value()[1], cube(1, 0, 1)[1], epsilon);
-  ASSERT_NEAR(cube.getvector(1, 0, 1).value()[2], cube(1, 0, 1)[2], epsilon);
+  ASSERT_NEAR(std::get<1>(cube.getvector(1, 0, 1))[0], cube(1, 0, 1)[0], epsilon);
+  ASSERT_NEAR(std::get<1>(cube.getvector(1, 0, 1))[1], cube(1, 0, 1)[1], epsilon);
+  ASSERT_NEAR(std::get<1>(cube.getvector(1, 0, 1))[2], cube(1, 0, 1)[2], epsilon);
 }

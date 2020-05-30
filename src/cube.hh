@@ -3,7 +3,7 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
-#include <optional>
+// #include <optional>
 #include <vector>
 
 #include "dir-enum.hh"
@@ -69,8 +69,8 @@ public:
   Plane<Tropicity> gettropplane(Direction bfielddir, int fixeddir, double fixedcoord, bool debug) const;
   void splitgrid(std::string gridfile, std::string weightfile, Direction bfielddir) const;
 
-  std::optional<coord3d> getvector(coord3d pos) const;
-  std::optional<coord3d> getvector(double x, double y, double z) const {
+  std::tuple<bool, coord3d> getvector(coord3d pos) const;
+  std::tuple<bool, coord3d> getvector(double x, double y, double z) const {
     return getvector(coord3d(x, y, z));
   }
 

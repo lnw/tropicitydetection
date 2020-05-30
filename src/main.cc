@@ -137,11 +137,11 @@ int main(int argc, char** argv) {
     const coord3d spacing(cube.get_spacing());
     coord3d point((stod(argv[3]) - origin[0]) / spacing[0], (stod(argv[4]) - origin[1]) / spacing[1], (stod(argv[5]) - origin[2]) / spacing[2]);
     auto optvect = cube.getvector(point);
-    if (!optvect) {
+    if (!std::get<0>(optvect)) {
       cout << "point outside the box" << endl;
       return 1;
     }
-    Trajectory traj(point, optvect.value(), 0.01);
+    Trajectory traj(point, std::get<1>(optvect), 0.01);
     traj.complete(cube);
     traj.write2mathematicalist("traj.txt");
     cout << "\nclassification: " << as_integer(traj.classify(Direction::pos_z)) << "\n";
