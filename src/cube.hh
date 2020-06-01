@@ -12,7 +12,7 @@
 #include "trop-enum.hh"
 
 
-std::vector<Tropicity> classify_points_cudax(const double* field, int64_t nx, int64_t ny, int64_t nz, double* origin, double* spacing, const double* coords, int32_t n_points, Direction bfielddir);
+std::vector<Tropicity> classify_points_cudax(const double* field, int64_t nx, int64_t ny, int64_t nz, double* origin, double* spacing, const double* coords, int64_t n_points, Direction bfielddir);
 
 
 class Cube {
@@ -79,7 +79,7 @@ public:
     delete[] spacing_a;
     delete[] coords_a;
 
-    std::cout << as_integer(res[0]) << ", " << as_integer(res[1]) << std::endl;
+    // std::cout << as_integer(res[0]) << ", " << as_integer(res[1]) << std::endl;
     return res;
   }
 

@@ -40,10 +40,6 @@ if(ENABLE_CUDA)
             set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -lineinfo --ptxas-options;-v)
             add_definitions(-DHAVE_CUDA_PROFILING)
         endif()
-    #    if (ENABLE_NVTX)
-    #        set(F2PY_LIBS "${F2PY_LIBS} -lnvToolsExt")
-    #        add_definitions(-DHAVE_NVTX)
-    #    endif()
         set(CUDA_NVCC_ARCH "52;60"
             CACHE STRING
             "List of CUDA Compute capability (35, 37, 60 for 3.5, 3.7, 6.0, respectively)"
@@ -55,13 +51,11 @@ if(ENABLE_CUDA)
         endforeach()
 
         set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}
-                        "--expt-relaxed-constexpr -lineinfo -I${CMAKE_INSTALL_PREFIX}/include/"
+                        "--expt-relaxed-constexpr -I${CMAKE_INSTALL_PREFIX}/include/"
            )
+        # set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} "-lineinfo ")
 
         message("cuda nvcc flags ${CUDA_NVCC_FLAGS}")
-  #       message(WARNING "
-  #       >> Remember to set CUDA_HOST_COMPILER to the correct version
-  #       (e.g. gcc <= 4.6 for CUDA 5.0)")
     endif()
 endif ()
 

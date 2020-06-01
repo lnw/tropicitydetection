@@ -30,12 +30,21 @@ TEST_F(ClassifyPlaneTest, planeXmagPosX) {
   Plane<Tropicity> tropicities = cube.gettropplane(bfielddir, planedir, dim * 3.0 / 4.0, debug);
   // std::cout << vec_as_integer(tropicities.data()) << endl;
 
-  int count = 0;
-  for (Tropicity tr: tropicities)
+  int count_dia = 0,
+      count_para = 0,
+      count_uncl = 0;
+  for (Tropicity tr: tropicities) {
+    if (tr == Tropicity::diatropic)
+      count_dia++;
+    if (tr == Tropicity::paratropic)
+      count_para++;
     if (tr == Tropicity::unclassifyable)
-      count++;
+      count_uncl++;
+  }
   // cout << count << endl;
-  ASSERT_GT(count, tropicities.size() * 0.1); // subject to a lot of noise, technically all unclassifyable
+  ASSERT_GT(count_dia, tropicities.size() * 0.15);   // subject to a lot of noise, technically all unclassifyable
+  ASSERT_GT(count_para, tropicities.size() * 0.15);  // subject to a lot of noise, technically all unclassifyable
+  ASSERT_GT(count_uncl, tropicities.size() * 0.005); // subject to a lot of noise, technically all unclassifyable
 }
 
 
@@ -54,12 +63,12 @@ TEST_F(ClassifyPlaneTest, planeXmagPosZ) {
   bool debug = false;
   int planedir = 0;
   Plane<Tropicity> tropicities = cube.gettropplane(bfielddir, planedir, dim * 3.0 / 4.0, debug);
-   std::cout << vec_as_integer(tropicities.data()) << endl;
+  // std::cout << vec_as_integer(tropicities.data()) << endl;
 
-ASSERT_EQ(tropicities(10,10) , Tropicity::paratropic);
-ASSERT_EQ(tropicities(30,10) , Tropicity::paratropic);
-ASSERT_EQ(tropicities(10,30) , Tropicity::paratropic);
-ASSERT_EQ(tropicities(30,30) , Tropicity::paratropic);
+  ASSERT_EQ(tropicities(10, 10), Tropicity::paratropic);
+  ASSERT_EQ(tropicities(30, 10), Tropicity::paratropic);
+  ASSERT_EQ(tropicities(10, 30), Tropicity::paratropic);
+  ASSERT_EQ(tropicities(30, 30), Tropicity::paratropic);
 }
 
 
@@ -78,12 +87,12 @@ TEST_F(ClassifyPlaneTest, planeXmagNegZ) {
   bool debug = false;
   int planedir = 0;
   Plane<Tropicity> tropicities = cube.gettropplane(bfielddir, planedir, dim * 3.0 / 4.0, debug);
-  std::cout << vec_as_integer(tropicities.data()) << endl;
+  // std::cout << vec_as_integer(tropicities.data()) << endl;
 
-ASSERT_EQ(tropicities(10,10) , Tropicity::diatropic);
-ASSERT_EQ(tropicities(30,10) , Tropicity::diatropic);
-ASSERT_EQ(tropicities(10,30) , Tropicity::diatropic);
-ASSERT_EQ(tropicities(30,30) , Tropicity::diatropic);
+  ASSERT_EQ(tropicities(10, 10), Tropicity::diatropic);
+  ASSERT_EQ(tropicities(30, 10), Tropicity::diatropic);
+  ASSERT_EQ(tropicities(10, 30), Tropicity::diatropic);
+  ASSERT_EQ(tropicities(30, 30), Tropicity::diatropic);
 }
 
 
@@ -104,12 +113,21 @@ TEST_F(ClassifyPlaneTest, planeYmagPosX) {
   Plane<Tropicity> tropicities = cube.gettropplane(bfielddir, planedir, dim * 3.0 / 4.0, debug);
   // std::cout << vec_as_integer(tropicities.data()) << endl;
 
-  int count = 0;
-  for (Tropicity tr: tropicities)
+  int count_dia = 0,
+      count_para = 0,
+      count_uncl = 0;
+  for (Tropicity tr: tropicities) {
+    if (tr == Tropicity::diatropic)
+      count_dia++;
+    if (tr == Tropicity::paratropic)
+      count_para++;
     if (tr == Tropicity::unclassifyable)
-      count++;
+      count_uncl++;
+  }
   // cout << count << endl;
-  ASSERT_GT(count, tropicities.size() * 0.05); // subject to a lot of noise, technically all unclassifyable
+  ASSERT_GT(count_dia, tropicities.size() * 0.15);   // subject to a lot of noise, technically all unclassifyable
+  ASSERT_GT(count_para, tropicities.size() * 0.15);  // subject to a lot of noise, technically all unclassifyable
+  ASSERT_GT(count_uncl, tropicities.size() * 0.005); // subject to a lot of noise, technically all unclassifyable
 }
 
 
@@ -130,10 +148,10 @@ TEST_F(ClassifyPlaneTest, planeYmagPosZ) {
   Plane<Tropicity> tropicities = cube.gettropplane(bfielddir, planedir, dim * 3.0 / 4.0, debug);
   // std::cout << vec_as_integer(tropicities.data()) << endl;
 
-ASSERT_EQ(tropicities(10,10) , Tropicity::paratropic);
-ASSERT_EQ(tropicities(30,10) , Tropicity::paratropic);
-ASSERT_EQ(tropicities(10,30) , Tropicity::paratropic);
-ASSERT_EQ(tropicities(30,30) , Tropicity::paratropic);
+  ASSERT_EQ(tropicities(10, 10), Tropicity::paratropic);
+  ASSERT_EQ(tropicities(30, 10), Tropicity::paratropic);
+  ASSERT_EQ(tropicities(10, 30), Tropicity::paratropic);
+  ASSERT_EQ(tropicities(30, 30), Tropicity::paratropic);
 }
 
 
@@ -154,10 +172,10 @@ TEST_F(ClassifyPlaneTest, planeYmagNegZ) {
   Plane<Tropicity> tropicities = cube.gettropplane(bfielddir, planedir, dim * 3.0 / 4.0, debug);
   // std::cout << vec_as_integer(tropicities.data()) << endl;
 
-ASSERT_EQ(tropicities(10,10) , Tropicity::diatropic);
-ASSERT_EQ(tropicities(30,10) , Tropicity::diatropic);
-ASSERT_EQ(tropicities(10,30) , Tropicity::diatropic);
-ASSERT_EQ(tropicities(30,30) , Tropicity::diatropic);
+  ASSERT_EQ(tropicities(10, 10), Tropicity::diatropic);
+  ASSERT_EQ(tropicities(30, 10), Tropicity::diatropic);
+  ASSERT_EQ(tropicities(10, 30), Tropicity::diatropic);
+  ASSERT_EQ(tropicities(30, 30), Tropicity::diatropic);
 }
 
 
@@ -178,12 +196,21 @@ TEST_F(ClassifyPlaneTest, planeZmagPosX) {
   Plane<Tropicity> tropicities = cube.gettropplane(bfielddir, planedir, dim * 3.0 / 4.0, debug);
   // std::cout << vec_as_integer(tropicities.data()) << endl;
 
-  int count = 0;
-  for (Tropicity tr: tropicities)
+  int count_dia = 0,
+      count_para = 0,
+      count_uncl = 0;
+  for (Tropicity tr: tropicities) {
+    if (tr == Tropicity::diatropic)
+      count_dia++;
+    if (tr == Tropicity::paratropic)
+      count_para++;
     if (tr == Tropicity::unclassifyable)
-      count++;
+      count_uncl++;
+  }
   // cout << count << endl;
-  ASSERT_GT(count, tropicities.size() * 0.05); // subject to a lot of noise, technically all unclassifyable
+  ASSERT_GT(count_dia, tropicities.size() * 0.15);  // subject to a lot of noise, technically all unclassifyable
+  ASSERT_GT(count_para, tropicities.size() * 0.15); // subject to a lot of noise, technically all unclassifyable
+  // ASSERT_GT(count_uncl, tropicities.size() * 0.005); // subject to a lot of noise, technically all unclassifyable
 }
 
 
