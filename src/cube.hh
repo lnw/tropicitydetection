@@ -60,10 +60,10 @@ public:
       field_a[3 * i + 2] = field[i][2];
     }
     double* origin_a = new double[3];
-    for (int i; i < 3; i++)
+    for (int i = 0; i < 3; i++)
       origin_a[i] = origin[i];
     double* spacing_a = new double[3];
-    for (int i; i < 3; i++)
+    for (int i = 0; i < 3; i++)
       spacing_a[i] = spacing[i];
     double* coords_a = new double[3 * coords.size()];
     for (size_t i = 0; i < coords.size(); i++) {
@@ -71,11 +71,16 @@ public:
       coords_a[3 * i + 1] = coords[i][1];
       coords_a[3 * i + 2] = coords[i][2];
     }
-    return classify_points_cudax(field_a, n_x, n_y, n_z, origin_a, spacing_a, coords_a, coords.size(), bfielddir);
+    // std::cout << spacing[0] << ", " << spacing[1] << ", " << spacing[2] <<std::endl;
+    // std::cout << spacing_a[0] << ", " << spacing_a[1] << ", " << spacing_a[2] <<std::endl;
+    std::vector<Tropicity> res = classify_points_cudax(field_a, n_x, n_y, n_z, origin_a, spacing_a, coords_a, coords.size(), bfielddir);
     delete[] field_a;
     delete[] origin_a;
     delete[] spacing_a;
     delete[] coords_a;
+
+    std::cout << as_integer(res[0]) << ", " << as_integer(res[1]) << std::endl;
+    return res;
   }
 
   std::vector<Tropicity> classify_points_cpu(const std::vector<coord3d>& coords, Direction bfielddir) const;

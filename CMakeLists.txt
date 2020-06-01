@@ -55,7 +55,7 @@ if(ENABLE_CUDA)
         endforeach()
 
         set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}
-                        "--expt-relaxed-constexpr -I${CMAKE_INSTALL_PREFIX}/include/"
+                        "--expt-relaxed-constexpr -lineinfo -I${CMAKE_INSTALL_PREFIX}/include/"
            )
 
         message("cuda nvcc flags ${CUDA_NVCC_FLAGS}")

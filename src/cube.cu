@@ -23,7 +23,8 @@ __device__ bool outofbounds(const coord3d_d& pos, int n_x, int n_y, int n_z) {
 
 
 // trilinear interpolation
-__device__ bool getvector(const coord3d_d& pos, coord3d_d* field, int n_x, int n_y, int n_z, coord3d_d& res_vec) {
+__device__ bool getvector(const coord3d_d& pos, const coord3d_d* field, const int32_t n_x, const int32_t n_y, const int32_t n_z, coord3d_d& res_vec) {
+  int indx = threadIdx.x + blockIdx.x * blockDim.x;
   if (outofbounds(pos, n_x, n_y, n_z))
     return false;
 
@@ -37,6 +38,8 @@ __device__ bool getvector(const coord3d_d& pos, coord3d_d* field, int n_x, int n
   int z0 = int(floor(pos[2]));
   int z1 = z0 + 1;
   coord3d_d v000 = field[n_x * n_y * z0 + n_x * y0 + x0];
+  //   if (indx>31&&indx < 64) printf("v000 %d %d\n", indx, n_x * n_y * z0 + n_x * y0 + x0);
+  //   if (indx>31&&indx < 64) printf("v000 %d %f/%f/%f\n", indx, v000[0], v000[1], v000[2]);
   coord3d_d v001 = field[n_x * n_y * z1 + n_x * y0 + x0];
   coord3d_d v010 = field[n_x * n_y * z0 + n_x * y1 + x0];
   coord3d_d v011 = field[n_x * n_y * z1 + n_x * y1 + x0];
@@ -50,22 +53,27 @@ __device__ bool getvector(const coord3d_d& pos, coord3d_d* field, int n_x, int n
   coord3d_d aux3 = (x1 - x) * v011 + (x - x0) * v111;
   coord3d_d aux4 = (y1 - y) * aux0 + (y - y0) * aux1;
   coord3d_d aux5 = (y1 - y) * aux2 + (y - y0) * aux3;
-  coord3d_d res = (z1 - z) * aux4 + (z - z0) * aux5;
+  res_vec = (z1 - z) * aux4 + (z - z0) * aux5;
   return true;
 }
 
 
 // Runge-Kutta method, 4th order
 // c --> positions, k --> vectors at c
-__device__ bool extend_rungekutta(coord3d_d* field, int n_x, int n_y, int n_z,
-                                  const coord3d_d& prevpos, double step_length, coord3d_d& newpos) {
+__device__ bool extend_rungekutta(const coord3d_d* field, const int32_t n_x, const int32_t n_y, const int32_t n_z,
+                                  const coord3d_d& prevpos, float step_length, coord3d_d& newpos) {
+  int indx = threadIdx.x + blockIdx.x * blockDim.x;
   coord3d_d c0 = prevpos;
+  // if (indx>31&&indx < 64) printf("pos 1 %d %f/%f/%f\n", indx, c0[0], c0[1], c0[2]);
+  //  if (indx < 2) printf("step_length %f\n", step_length);
 
   coord3d_d k0;
   bool good = getvector(c0, field, n_x, n_y, n_z, k0);
+  // if (indx>31&&indx < 64) printf("vec1 %d %f/%f/%f\n", indx, k0[0], k0[1], k0[2]);
   k0 = k0.normalised() * step_length;
 
   const coord3d_d c1 = c0 + k0 * 0.5;
+  // if (indx < 2) printf("prev pos %f/%f/%f\n", c1[0], c1[1], c1[2]);
 
   coord3d_d k1;
   good = getvector(c1, field, n_x, n_y, n_z, k1);
@@ -100,38 +108,58 @@ __device__ bool extend_rungekutta(coord3d_d* field, int n_x, int n_y, int n_z,
 }
 
 
-__device__ void complete_trajectory(coord3d_d* field_d, int n_x, int n_y, int n_z,
-                                    coord3d_d* positions, int& index, int max_points_traj,
+__device__ void complete_trajectory(const coord3d_d* __restrict__ field_d, const int n_x, const int n_y, const int n_z,
+                                     coord3d_d* __restrict__ positions, int& index, int max_points_traj,
                                     float return_ratio, float step_length, bool& out_of_bounds) {
+  const int indx = threadIdx.x + blockIdx.x * blockDim.x;
+  if (indx > 31 && indx < 64) printf("start vec %d: %f/%f/%f\n", indx, positions[0][0], positions[0][1], positions[0][2]);
 
+  out_of_bounds = false;
   double dist2farthest = -1; // if this is set at 0 at declaration, the following while loop will never run
+  if (indx > 31 && indx < 64) printf("first index %d\n", index);
+  // if (indx >31 &&indx < 64) printf("max points traj %d\n", max_points_traj);
   if (index > 0) {
     for (int i = 0; i <= index; i++)
       dist2farthest = std::max(dist2farthest, (positions[i] - positions[0]).norm());
   }
+  // if (indx < 1) printf("d2d %f\n", dist2farthest);
 
   // if we get to a point that is less return_ratio of the longest distance in the trajectory
   while ((positions[index] - positions[0]).norm() > return_ratio * dist2farthest) {
+    // if (indx > 31 && indx < 64) printf("xxx %d: .\n", indx);
+     if (indx == 42 ) printf("xxx0 %d: .\n", indx);
     if (!extend_rungekutta(field_d, n_x, n_y, n_z,
                            positions[index], step_length, positions[index + 1])) {
-      out_of_bounds = false;
+     if (indx == 42 ) printf("xxx1 %d: .\n", indx);
+      out_of_bounds = true;
+      if (indx > 31 && indx < 64) printf("p in traj (oob) %d: %d\n", indx, index + 1);
       return;
     }
+     if (indx == 42 ) printf("xxx2 %d: .\n", indx);
     index++;
+     if (indx == 42 ) printf("xxx3 %d: %f/%f/%f .\n", indx, positions[index][0],  positions[index][0],  positions[index][0]);
 
+    if (indx ==42) printf(" index, d2d %d, %f\n", index, dist2farthest);
     dist2farthest = std::max(dist2farthest, (positions[index] - positions[0]).norm());
+     if (indx == 42 ) printf("xxx4 %d: .\n", indx);
+    if (indx ==42) printf(" index, d2d %d, %f\n", index, dist2farthest);
 
-    if (index >= max_points_traj) {
+    if (index == max_points_traj - 2) {
       step_length *= 1.5;
       index = 0;
       dist2farthest = -1;
+
+      if (indx < 64) printf("problem 1\n");
     }
+     if (indx == 42 ) printf("xxx5 %d: .\n", indx);
   }
-  out_of_bounds = true;
+  if (indx > 31 && indx < 64) printf("p in traj %d: %d\n", indx, index + 1);
 }
 
 
-__device__ Tropicity classify_trajectory(coord3d_d* positions, int n_points, Direction bfielddir, bool out_of_bounds) {
+__device__ Tropicity classify_trajectory(const coord3d_d* positions, int n_points_in_traj, Direction bfielddir, bool out_of_bounds) {
+  int indx = threadIdx.x + blockIdx.x * blockDim.x;
+  // printf("p in traj %d: %d\n", indx, n_points_in_traj);
   coord3d_d bfield;
   switch (bfielddir) {
     case Direction::pos_x: {
@@ -159,7 +187,6 @@ __device__ Tropicity classify_trajectory(coord3d_d* positions, int n_points, Dir
       break;
     }
     default: {
-      //       cerr << "bfielddir value wasn't 0-5.\n";
       return Tropicity::input_error;
     }
   }
@@ -167,13 +194,15 @@ __device__ Tropicity classify_trajectory(coord3d_d* positions, int n_points, Dir
   if (out_of_bounds)
     return Tropicity::outofbounds;
 
-  coord3d_d crossum(0, 0, 0);
-  for (size_t i = 0; i < n_points; i++) {
-    crossum += positions[(i - 1 + n_points) % n_points].cross(positions[i]);
+  coord3d_d crosssum(0, 0, 0);
+  for (size_t i = 0; i < n_points_in_traj; i++) {
+    crosssum += positions[(i - 1 + n_points_in_traj) % n_points_in_traj].cross(positions[i]);
   }
   // crossum += positions[positions.size()-1].cross(positions[0]);
+  // if(indx<32) printf("cross: %f/%f/%f\n", crosssum[0], crosssum[1], crosssum[2]);
 
-  double dot_product = bfield.dot(crossum);
+  double dot_product = bfield.dot(crosssum);
+  // if(indx<32)printf("dp %d: %f\n", indx, dot_product);
   if (dot_product > 0)
     return Tropicity::paratropic;
   else if (dot_product < 0)
@@ -184,32 +213,43 @@ __device__ Tropicity classify_trajectory(coord3d_d* positions, int n_points, Dir
 
 
 __global__ void classify_points_kernel(coord3d_d* points, int32_t n_points,
-                                       coord3d_d* field_d, int32_t n_x, int32_t n_y, int32_t n_z,
-                                       coord3d_d* trajectories_d, float step_length, int max_points_traj,
+                                       const coord3d_d* field_d, const int32_t n_x, const int32_t n_y, const int32_t n_z,
+                                       coord3d_d* trajectories_d, float step_length, int64_t max_points_traj,
                                        Direction bfielddir, Tropicity* tropicities_d) {
-  printf("hello from the gpu\n");
 
-  for (int64_t i = 0; i < n_points; i++) {
-    coord3d_d vec;
-    bool good = getvector(points[i], field_d, n_x, n_y, n_z, vec);
-    if (!good) {
-      tropicities_d[i] = Tropicity::outofbounds;
-      continue;
-    }
+  const int32_t indx = threadIdx.x + blockIdx.x * blockDim.x;
+  if (indx < 2)
+    printf("hello from the gpu: %d\n", indx);
 
-    bool out_of_bounds;
-    int n_points_in_traj = 0;
-    float return_ratio = 0.2;
-    complete_trajectory(field_d, n_x, n_y, n_z,
-                        trajectories_d + 3 * max_points_traj * i, n_points_in_traj, max_points_traj,
-                        return_ratio, step_length, out_of_bounds);
-    tropicities_d[i] = classify_trajectory(trajectories_d + 3 * max_points_traj * i, max_points_traj, bfielddir, out_of_bounds);
+  if (indx > n_points)
+    return;
+
+  coord3d_d vec(0, 0, 0);
+  if (indx > 31 && indx < 64)
+    printf("pos %d %f/%f/%f\n", indx, points[indx][0], points[indx][1], points[indx][2]);
+  bool good = getvector(points[indx], field_d, n_x, n_y, n_z, vec);
+  if (indx > 31 && indx < 64)
+    printf("found vec %d %d: %f/%f/%f\n", indx, good, vec[0], vec[1], vec[2]);
+  if (!good) {
+    tropicities_d[indx] = Tropicity::outofbounds;
+    return;
   }
+
+  bool out_of_bounds;
+  int current_index_in_traj = 0;
+  float return_ratio = 0.2;
+  printf("wrong index %d: %ld\n", indx, max_points_traj * indx);
+  trajectories_d[ max_points_traj * indx] = points[indx];
+  complete_trajectory(field_d, n_x, n_y, n_z,
+                      trajectories_d +  max_points_traj * indx, current_index_in_traj, max_points_traj,
+                      return_ratio, step_length, out_of_bounds);
+  printf("p in traj %d: %d\n", indx, current_index_in_traj + 1);
+  tropicities_d[indx] = classify_trajectory(trajectories_d +  max_points_traj * indx, current_index_in_traj + 1, bfielddir, out_of_bounds);
 }
 
 
 std::vector<Tropicity> classify_points_cudax(const double* field_a, int64_t nx, int64_t ny, int64_t nz, double* origin_a, double* spacing_a,
-                                             const double* coords_a, int n_points, Direction bfielddir) {
+                                             const double* start_points_a, int32_t n_points, Direction bfielddir) {
   std::cout << __PRETTY_FUNCTION__ << std::endl;
 #if 0
   float steplength = 0.01;
@@ -217,42 +257,52 @@ std::vector<Tropicity> classify_points_cudax(const double* field_a, int64_t nx, 
   float step_length_ratio = 0.05;
   float step_length = step_length_ratio * spacing_a[0];
 #endif
- int32_t max_points_traj = 10000;
+  int64_t max_points_traj = 10000;
 
   std::vector<Tropicity> res(n_points);
   coord3d_d* field = new coord3d_d[nx * ny * nz];
+  coord3d_d* start_points = new coord3d_d[n_points];
 
   coord3d_d* field_d;
-  coord3d_d* points_d;
+  coord3d_d* start_points_d;
   Tropicity* res_d;
   coord3d_d* trajectories_d;
 
-  for (int i = 0; i < n_points; i++)
-    for (int j = 0; j < 3; j++)
+  for (int64_t i = 0; i < nx * ny * nz; i++)
+    for (int64_t j = 0; j < 3; j++)
       field[i][j] = field_a[3 * i + j];
+  for (int64_t i = 0; i < n_points; i++)
+    for (int64_t j = 0; j < 3; j++)
+      start_points[i][j] = start_points_a[3 * i + j];
+  // std::cout << "f1630 " << field[1630][0] << ", " << field[1630][1]<< ", " << field[1630][2] << endl;
 
   // alloc
   cudaMalloc((void**)&field_d, nx * ny * nz * sizeof(coord3d_d));
-  cudaMalloc((void**)&points_d, n_points * sizeof(coord3d_d));
-  cudaMalloc((void**)&trajectories_d, n_points * 10000 * 3 * sizeof(coord3d_d));
+  cudaMalloc((void**)&start_points_d, n_points * sizeof(coord3d_d));
+  cudaMalloc((void**)&trajectories_d, n_points * max_points_traj * sizeof(coord3d_d));
   cudaMalloc((void**)&res_d, n_points * sizeof(Tropicity));
 
   // copy to device
-  cudaMemcpy(field_d, field, n_points * sizeof(coord3d_d), cudaMemcpyHostToDevice);
+  cudaMemcpy(field_d, field, nx * ny * nz * sizeof(coord3d_d), cudaMemcpyHostToDevice);
+  cudaMemcpy(start_points_d, start_points, n_points * sizeof(coord3d_d), cudaMemcpyHostToDevice);
 
-  classify_points_kernel<<<3, 3>>>(points_d, n_points,
-                                   field_d, nx, ny, nz,
-                                   trajectories_d, step_length, max_points_traj,
- bfielddir, res_d);
+  int block_size = 512;
+  int grid_size = n_points / block_size + (n_points % block_size != 0);
+  std::cout << "points / gridsize / blocksize: " << n_points << ", " << grid_size << ", " << block_size << std::endl;
+  classify_points_kernel<<<grid_size, block_size>>>(start_points_d, n_points,
+                                                    field_d, nx, ny, nz,
+                                                    trajectories_d, step_length, max_points_traj,
+                                                    bfielddir, res_d);
 
   // copy from device
   cudaMemcpy(res.data(), res_d, n_points * sizeof(Tropicity), cudaMemcpyDeviceToHost);
 
   // dealloc
   cudaFree(field_d);
-  cudaFree(points_d);
+  cudaFree(start_points_d);
   cudaFree(trajectories_d);
   cudaFree(res_d);
   delete[] field;
+  delete[] start_points;
   return res;
 }

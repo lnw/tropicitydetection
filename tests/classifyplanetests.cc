@@ -54,7 +54,7 @@ TEST_F(ClassifyPlaneTest, planeXmagPosZ) {
   bool debug = false;
   int planedir = 0;
   Plane<Tropicity> tropicities = cube.gettropplane(bfielddir, planedir, dim * 3.0 / 4.0, debug);
-  // std::cout << vec_as_integer(tropicities.data()) << endl;
+   std::cout << vec_as_integer(tropicities.data()) << endl;
 
 ASSERT_EQ(tropicities(10,10) , Tropicity::paratropic);
 ASSERT_EQ(tropicities(30,10) , Tropicity::paratropic);
@@ -78,7 +78,7 @@ TEST_F(ClassifyPlaneTest, planeXmagNegZ) {
   bool debug = false;
   int planedir = 0;
   Plane<Tropicity> tropicities = cube.gettropplane(bfielddir, planedir, dim * 3.0 / 4.0, debug);
-  // std::cout << vec_as_integer(tropicities.data()) << endl;
+  std::cout << vec_as_integer(tropicities.data()) << endl;
 
 ASSERT_EQ(tropicities(10,10) , Tropicity::diatropic);
 ASSERT_EQ(tropicities(30,10) , Tropicity::diatropic);

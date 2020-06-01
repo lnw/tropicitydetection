@@ -269,6 +269,7 @@ Plane<Tropicity> Cube::gettropplane(Direction bfielddir, int fixeddir, double fi
         coords[y * n_x + x] = coord3d(x, y, fixedcoord);
       }
     }
+    std::cout << "coords " << coords[0] << ", " << coords[4] << std::endl;
     std::vector<Tropicity> tropicities = classify_points(coords, bfielddir);
     return Plane<Tropicity>(n_x, n_y, tropicities);
   }
@@ -280,6 +281,7 @@ Plane<Tropicity> Cube::gettropplane(Direction bfielddir, int fixeddir, double fi
         coords[x * n_z + z] = coord3d(x, fixedcoord, z);
       }
     }
+    std::cout << "coords " << coords[0] << ", " << coords[4] << std::endl;
     std::vector<Tropicity> tropicities = classify_points(coords, bfielddir);
     return Plane<Tropicity>(n_z, n_x, tropicities);
   }
@@ -291,6 +293,7 @@ Plane<Tropicity> Cube::gettropplane(Direction bfielddir, int fixeddir, double fi
         coords[z * n_y + y] = coord3d(fixedcoord, y, z);
       }
     }
+    std::cout << "coords " << coords[0] << ", " << coords[4] << std::endl;
     std::vector<Tropicity> tropicities = classify_points(coords, bfielddir);
     return Plane<Tropicity>(n_y, n_z, tropicities);
   }
