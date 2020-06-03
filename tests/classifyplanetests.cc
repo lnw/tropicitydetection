@@ -271,3 +271,28 @@ TEST_F(ClassifyPlaneTest, planeZmagNegZ) {
   ASSERT_EQ(tropicities(20, 35), Tropicity::diatropic);
   ASSERT_EQ(tropicities(35, 20), Tropicity::diatropic);
 }
+
+TEST_F(ClassifyPlaneTest, planeXmagPosZLarge) {
+  int dim = 150;
+  Cube cube(dim, dim, dim);
+  for (int x = 0; x < cube.nx(); x++) {
+    for (int y = 0; y < cube.ny(); y++) {
+      for (int z = 0; z < cube.nz(); z++) {
+        cube(x, y, z) = coord3d(-(y - dim / 2), x - dim / 2, 0.0);
+      }
+    }
+  }
+
+  Direction bfielddir = Direction::pos_z;
+  bool debug = false;
+  int planedir = 0;
+  Plane<Tropicity> tropicities = cube.gettropplane(bfielddir, planedir, dim * 3.0 / 4.0, debug);
+  // std::cout << vec_as_integer(tropicities.data()) << endl;
+
+  ASSERT_EQ(tropicities(20, 20), Tropicity::paratropic);
+  ASSERT_EQ(tropicities(120, 20), Tropicity::paratropic);
+  ASSERT_EQ(tropicities(20, 120), Tropicity::paratropic);
+  ASSERT_EQ(tropicities(120, 120), Tropicity::paratropic);
+}
+
+

@@ -50,9 +50,6 @@ bool Trajectory::extend_rungekutta(const Cube& cube) {
 
 
 void Trajectory::complete(const Cube& cube, double return_ratio) {
-  // if (directions[0].norm() < threshold) {out_of_bounds=true; return;} //if the intensity is vero low, don't bother completing. classify as "out_of_bounds"
-  // the above is commented out because i didn't figure out what would be a good value for this threshold
-  // if someone does, this would probably save some computational time
   // const double step_length_ratio = 0.05;
   // step_length = step_length_ratio * cube.get_spacing()[0];
   int max_steps = 10000;

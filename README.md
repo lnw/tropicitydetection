@@ -44,7 +44,7 @@ python splitgrid.py --input QZVPPDh2te-m06-2x.vti --bfielddir 5 --grid grid4h2te
 ```
 mkdir build
 cd build
-cmake .. -DCMAKE_BUILD_TYPE=<DEBUG,RELEASE> -DENABLE_PYTHON=<TRUE,FALSE> -DENABLE_CUDA=<TRUE,FALSE>
+cmake .. -DCMAKE_BUILD_TYPE=<DEBUG,RELEASE> -DENABLE_PYTHON=<TRUE,FALSE> -DENABLE_CUDA=<TRUE,FALSE> -DENABLE_OMP=<TRUE,FALSE>
 make
 ```
 

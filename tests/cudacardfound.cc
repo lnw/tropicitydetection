@@ -1,10 +1,5 @@
 #include "gtest/gtest.h"
 
-#include "../src/cube.hh"
-#include "../src/geometry3.hh"
-#include "../src/trajectory.hh"
-#include "../src/trop-enum.hh"
-
 #include "../src/gpu-info.hh"
 
 
@@ -18,6 +13,7 @@ public:
 #if HAVE_CUDA
 TEST_F(CudaCardFoundTest, anydevice) {
 
+  print_device_props_complete();
   int devCount = number_cuda_devices();
   ASSERT_GE(devCount, 1);
 }
