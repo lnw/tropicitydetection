@@ -15,6 +15,9 @@ PYBIND11_PLUGIN(libtropicity) {
   // enum class Tropicity
   py::class_<Tropicity>(mod, "Tropicity");
 
+  // enum class Direction
+  py::class_<Direction>(mod, "Direction");
+
   // class coord3d
   py::class_<coord3d>(mod, "coord3d")
       .def(py::init<float, float, float>());
@@ -23,11 +26,11 @@ PYBIND11_PLUGIN(libtropicity) {
   py::class_<Cube>(mod, "cube")
       .def(py::init<string>())
       .def("gettropplane", &Cube::gettropplane)     // int, int, double
-      .def("writetropplane", &Cube::writetropplane) // string, vector<vector<TROP>>
+      .def("writetropplane", &Cube::writetropplane) // string, Plane<TROP>
       .def("writecube", &Cube::writecube)           // string
-      //.def("getvector", &Cube::getvector)           // coord3d
-      .def("outofbounds", &Cube::outofbounds) //
-      .def("splitgrid", &Cube::splitgrid);    // string, string, int
+      .def("outofbounds", &Cube::outofbounds)          //
+      .def("splitgrid", &Cube::splitgrid)              // string, string, int
+      .def("classify_points", &Cube::classify_points); // vector<coord3d>, Direction
 
   // class trajectory
   py::class_<Trajectory>(mod, "trajectory")
