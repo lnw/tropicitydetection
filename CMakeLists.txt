@@ -36,7 +36,7 @@ if(ENABLE_CUDA)
         message("Cuda include directories ${CUDA_INCLUDE_DIRS}")
         message("Cuda libraries ${CUDA_CUBLAS_LIBRARIES} ${CUDA_LIBRARIES}")
         set(LIBS ${LIBS} ${CUDA_CUBLAS_LIBRARIES} ${CUDA_LIBRARIES})
-        set(CUDA_NVCC_ARCH "52;60") # built for compute capabilties 5.2 and 6.0
+        set(CUDA_NVCC_ARCH "52;60") # build for compute capabilties 5.2 and 6.0
         foreach (ARCH ${CUDA_NVCC_ARCH})
             set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}
                         "-gencode arch=compute_${ARCH},code=sm_${ARCH}"

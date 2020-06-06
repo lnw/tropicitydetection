@@ -1,7 +1,7 @@
 # tropicitydetection
 
 A simple program to determine the tropicity at a set of points in a vector
-field.  One possible usage is to investigate magentically induced electric
+field.  One possible usage is to investigate magnetically induced electric
 currents in molecular systems.
 
 
@@ -42,11 +42,12 @@ python assign_plane.py --input QZVPPDh2te-m06-2x.vti --output output.txt --bfiel
 python splitgrid.py --input QZVPPDh2te-m06-2x.vti --bfielddir 5 --grid grid4h2te --weights weights4h2te
 ```
 
-## cuda suppport
+## cuda support
 
 The cuda support passes all tests, but is tested only with a device with
 compute capability 5.2.  The implementation is, however, so naive that it
-likely also works with newer or older devices.
+likely also works with newer or older devices.  In order to compile for other
+compute capabilities, the cmake-file needs to be adapted.
 
 
 ## installation

@@ -1,8 +1,8 @@
 #include "gtest/gtest.h"
 
-#include "../src/cube.hh"
-#include "../src/geometry3.hh"
-#include "../src/trajectory.hh"
+#include "cube.hh"
+#include "geometry3.hh"
+#include "trajectory.hh"
 
 using namespace std;
 

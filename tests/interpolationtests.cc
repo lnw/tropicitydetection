@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
-#include "../src/cube.hh"
-#include "../src/geometry3.hh"
+#include "cube.hh"
+#include "geometry3.hh"
 
 using namespace std;
 

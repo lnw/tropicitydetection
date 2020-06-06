@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "../src/gpu-info.hh"
+#include "gpu-info.hh"
 
 
 using namespace std;

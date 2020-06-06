@@ -30,6 +30,8 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
   include_directories("${gtest_SOURCE_DIR}/include")
 endif()
 
+include_directories(${CMAKE_SOURCE_DIR}/src)
+
 set(testsources
     classifyplanetests.cc
     completetrajectorytests.cc
@@ -39,7 +41,6 @@ set(testsources
 if(CUDA_FOUND)
     set(testsources ${testsources}
         cudacardfound.cc
-        cudainterpolationtests.cc
        )
 endif()
 

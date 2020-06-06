@@ -1,10 +1,10 @@
 #include "gtest/gtest.h"
 
-#include "../src/cube.hh"
-#include "../src/dir-enum.hh"
-#include "../src/geometry3.hh"
-#include "../src/trajectory.hh"
-#include "../src/trop-enum.hh"
+#include "cube.hh"
+#include "dir-enum.hh"
+#include "geometry3.hh"
+#include "trajectory.hh"
+#include "trop-enum.hh"
 
 using namespace std;
 
