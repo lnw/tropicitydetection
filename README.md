@@ -1,5 +1,9 @@
 # tropicitydetection
-Splitting .vti files to paratropic and diatropic parts.
+
+A simple program to determine the tropicity at a set of points in a vector
+field.  One possible usage is to investigate magentically induced electric
+currents in molecular systems.
+
 
 ## Usage
 Running 'main' without any arguments tells you which commands are available.
@@ -37,6 +41,12 @@ is the following:
 python assign_plane.py --input QZVPPDh2te-m06-2x.vti --output output.txt --bfielddir 5 --perpdir 0 --perpcoord 0.0
 python splitgrid.py --input QZVPPDh2te-m06-2x.vti --bfielddir 5 --grid grid4h2te --weights weights4h2te
 ```
+
+## cuda suppport
+
+The cuda support passes all tests, but is tested only with a device with
+compute capability 5.2.  The implementation is, however, so naive that it
+likely also works with newer or older devices.
 
 
 ## installation
