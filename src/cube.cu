@@ -1,4 +1,3 @@
-
 #include <cmath>
 #include <fstream>
 #include <iostream>
@@ -23,8 +22,13 @@ __device__ bool outofbounds(const coord3d_d& pos, int64_t nx, int64_t ny, int64_
 
 
 // trilinear interpolation
-__device__ bool getvector(const coord3d_d& pos, const coord3d_d* __restrict__ field, const int64_t nx, const int64_t ny, const int64_t nz, coord3d_d& res_vec) {
+__device__ bool getvector(const coord3d_d& pos, const cudaPitchedPtr field_d, const int64_t nx, const int64_t ny, const int64_t nz, coord3d_d& res_vec) {
   // int indx = threadIdx.x + blockIdx.x * blockDim.x;
+
+  char* ptr = (char*)field_d.ptr;
+  // pitch being xdim * sizeof(thing) rounded up to a multiple of 32
+  size_t pitch = field_d.pitch;
+
   if (outofbounds(pos, nx, ny, nz))
     return false;
 
@@ -37,14 +41,14 @@ __device__ bool getvector(const coord3d_d& pos, const coord3d_d* __restrict__ fi
   int y1 = y0 + 1;
   int z0 = int(floor(pos[2]));
   int z1 = z0 + 1;
-  coord3d_d v000 = field[nx * ny * z0 + nx * y0 + x0];
-  coord3d_d v001 = field[nx * ny * z1 + nx * y0 + x0];
-  coord3d_d v010 = field[nx * ny * z0 + nx * y1 + x0];
-  coord3d_d v011 = field[nx * ny * z1 + nx * y1 + x0];
-  coord3d_d v100 = field[nx * ny * z0 + nx * y0 + x1];
-  coord3d_d v101 = field[nx * ny * z1 + nx * y0 + x1];
-  coord3d_d v110 = field[nx * ny * z0 + nx * y1 + x1];
-  coord3d_d v111 = field[nx * ny * z1 + nx * y1 + x1];
+  coord3d_d v000 = *(coord3d_d*)(ptr + (pitch * ny * z0 + pitch * y0 + x0 * sizeof(coord3d_d)));
+  coord3d_d v001 = *(coord3d_d*)(ptr + (pitch * ny * z1 + pitch * y0 + x0 * sizeof(coord3d_d)));
+  coord3d_d v010 = *(coord3d_d*)(ptr + (pitch * ny * z0 + pitch * y1 + x0 * sizeof(coord3d_d)));
+  coord3d_d v011 = *(coord3d_d*)(ptr + (pitch * ny * z1 + pitch * y1 + x0 * sizeof(coord3d_d)));
+  coord3d_d v100 = *(coord3d_d*)(ptr + (pitch * ny * z0 + pitch * y0 + x1 * sizeof(coord3d_d)));
+  coord3d_d v101 = *(coord3d_d*)(ptr + (pitch * ny * z1 + pitch * y0 + x1 * sizeof(coord3d_d)));
+  coord3d_d v110 = *(coord3d_d*)(ptr + (pitch * ny * z0 + pitch * y1 + x1 * sizeof(coord3d_d)));
+  coord3d_d v111 = *(coord3d_d*)(ptr + (pitch * ny * z1 + pitch * y1 + x1 * sizeof(coord3d_d)));
   coord3d_d aux0 = (x1 - x) * v000 + (x - x0) * v100;
   coord3d_d aux1 = (x1 - x) * v010 + (x - x0) * v110;
   coord3d_d aux2 = (x1 - x) * v001 + (x - x0) * v101;
@@ -58,43 +62,38 @@ __device__ bool getvector(const coord3d_d& pos, const coord3d_d* __restrict__ fi
 
 // Runge-Kutta method, 4th order
 // c --> positions, k --> vectors at c
-__device__ bool extend_rungekutta(const coord3d_d* __restrict__ field, const int64_t nx, const int64_t ny, const int64_t nz,
+__device__ bool extend_rungekutta(const cudaPitchedPtr field_d, const int64_t nx, const int64_t ny, const int64_t nz,
                                   const coord3d_d& prevpos, float step_length, coord3d_d& newpos) {
   // int indx = threadIdx.x + blockIdx.x * blockDim.x;
   coord3d_d c0 = prevpos;
-
   coord3d_d k0;
-  bool good = getvector(c0, field, nx, ny, nz, k0);
+  bool good = getvector(c0, field_d, nx, ny, nz, k0);
   k0 = k0.normalised() * step_length;
 
   const coord3d_d c1 = c0 + k0 * 0.5;
-
   coord3d_d k1;
-  good = getvector(c1, field, nx, ny, nz, k1);
+  good = getvector(c1, field_d, nx, ny, nz, k1);
   if (!good)
     return false;
   k1 = k1.normalised() * step_length;
 
   const coord3d_d c2 = c0 + k1 * 0.5;
-
   coord3d_d k2;
-  good = getvector(c2, field, nx, ny, nz, k2);
+  good = getvector(c2, field_d, nx, ny, nz, k2);
   if (!good)
     return false;
   k2 = k2.normalised() * step_length;
 
   const coord3d_d c3 = c0 + k2;
-
   coord3d_d k3;
-  good = getvector(c3, field, nx, ny, nz, k3);
+  good = getvector(c3, field_d, nx, ny, nz, k3);
   if (!good)
     return false;
   k3 = k3.normalised() * step_length;
 
   const coord3d_d c4 = c0 + (k0 + k1 * 2.0 + k2 * 2.0 + k3) / 6.0;
-
   coord3d_d k4;
-  good = getvector(c4, field, nx, ny, nz, k4);
+  good = getvector(c4, field_d, nx, ny, nz, k4);
   if (!good)
     return false;
   newpos = c4;
@@ -102,12 +101,10 @@ __device__ bool extend_rungekutta(const coord3d_d* __restrict__ field, const int
 }
 
 
-__device__ void complete_trajectory(const coord3d_d* __restrict__ field_d, const int nx, const int ny, const int nz,
+__device__ void complete_trajectory(const cudaPitchedPtr field_d, const int nx, const int ny, const int nz,
                                     coord3d_d* __restrict__ positions, int& index, int max_points_traj,
                                     float return_ratio, float step_length, bool& out_of_bounds) {
-  const int indx = threadIdx.x + blockIdx.x * blockDim.x;
-  // if (indx > 31 && indx < 64) printf("start vec %d: %f/%f/%f\n", indx, positions[0][0], positions[0][1], positions[0][2]);
-
+  // const int indx = threadIdx.x + blockIdx.x * blockDim.x;
   out_of_bounds = false;
   double dist2farthest = -1; // if this is set at 0 at declaration, the following while loop will never run
   if (index > 0) {
@@ -115,18 +112,17 @@ __device__ void complete_trajectory(const coord3d_d* __restrict__ field_d, const
       dist2farthest = std::max(dist2farthest, (positions[i] - positions[0]).norm());
   }
 
-  // if we get to a point that is less return_ratio of the longest distance in the trajectory
+  // if we get to a point that is less than return_ratio of the longest distance in the trajectory
   while ((positions[index] - positions[0]).norm() > return_ratio * dist2farthest) {
     if (!extend_rungekutta(field_d, nx, ny, nz,
                            positions[index], step_length, positions[index + 1])) {
       out_of_bounds = true;
+      // printf("%d: %d oob\n", indx, index);
       return;
     }
     index++;
 
-    // if (indx == 42) printf(" index, d2d %d, %f\n", index, dist2farthest);
     dist2farthest = std::max(dist2farthest, (positions[index] - positions[0]).norm());
-    // if (indx == 42) printf(" index, d2d %d, %f\n", index, dist2farthest);
 
     if (index == max_points_traj - 2) {
       step_length *= 1.5;
@@ -134,12 +130,12 @@ __device__ void complete_trajectory(const coord3d_d* __restrict__ field_d, const
       dist2farthest = -1;
     }
   }
-  // if (indx > 31 && indx < 64) printf("p in traj %d: %d\n", indx, index + 1);
+  // printf("%d: %d\n", indx, index);
 }
 
 
 __device__ Tropicity classify_trajectory(const coord3d_d* __restrict__ positions, int n_points_in_traj, Direction bfielddir, bool out_of_bounds) {
-  int indx = threadIdx.x + blockIdx.x * blockDim.x;
+  // int indx = threadIdx.x + blockIdx.x * blockDim.x;
   // printf("p in traj %d: %d\n", indx, n_points_in_traj);
   coord3d_d bfield;
   switch (bfielddir) {
@@ -180,7 +176,7 @@ __device__ Tropicity classify_trajectory(const coord3d_d* __restrict__ positions
     crosssum += positions[(i - 1 + n_points_in_traj) % n_points_in_traj].cross(positions[i]);
   }
   // crossum += positions[positions.size()-1].cross(positions[0]);
-  // if(indx<32) printf("cross: %f/%f/%f\n", crosssum[0], crosssum[1], crosssum[2]);
+  // if (indx < 40) printf("cross: %f/%f/%f\n", crosssum[0], crosssum[1], crosssum[2]);
 
   double dot_product = bfield.dot(crosssum);
   if (dot_product > 0)
@@ -193,7 +189,7 @@ __device__ Tropicity classify_trajectory(const coord3d_d* __restrict__ positions
 
 
 __global__ void classify_points_kernel(coord3d_d* __restrict__ points, int64_t n_points,
-                                       const coord3d_d* field_d, const int64_t nx, const int64_t ny, const int64_t nz,
+                                       const cudaPitchedPtr field_d, const int64_t nx, const int64_t ny, const int64_t nz,
                                        coord3d_d* __restrict__ trajectories_d, float step_length, int64_t max_points_traj,
                                        Direction bfielddir, Tropicity* __restrict__ tropicities_d) {
 
@@ -204,9 +200,9 @@ __global__ void classify_points_kernel(coord3d_d* __restrict__ points, int64_t n
     return;
 
   coord3d_d vec(0, 0, 0);
-  // if (indx > 31 && indx < 64) printf("pos %d %f/%f/%f\n", indx, points[indx][0], points[indx][1], points[indx][2]);
+  // if (indx < 40) printf("pos %d %f/%f/%f\n", indx, points[indx][0], points[indx][1], points[indx][2]);
   bool good = getvector(points[indx], field_d, nx, ny, nz, vec);
-  // if (indx > 31 && indx < 64) printf("found vec %d %d: %f/%f/%f\n", indx, good, vec[0], vec[1], vec[2]);
+  // if (indx < 40) printf("found vec %d %d: %f/%f/%f\n", indx, good, vec[0], vec[1], vec[2]);
   if (!good) {
     tropicities_d[indx] = Tropicity::outofbounds;
     return;
@@ -238,7 +234,6 @@ std::vector<Tropicity> classify_points_cudax(const double* field_a, const int64_
   coord3d_d* field = new coord3d_d[nx * ny * nz];
   coord3d_d* start_points = new coord3d_d[n_points];
 
-  coord3d_d* field_d;
   coord3d_d* start_points_d;
   Tropicity* res_d;
   coord3d_d* trajectories_d;
@@ -249,16 +244,26 @@ std::vector<Tropicity> classify_points_cudax(const double* field_a, const int64_
   for (int64_t i = 0; i < n_points; i++)
     for (int64_t j = 0; j < 3; j++)
       start_points[i][j] = start_points_a[3 * i + j];
-  // std::cout << "f1630 " << field[1630][0] << ", " << field[1630][1]<< ", " << field[1630][2] << endl;
+
+  cudaPitchedPtr field_d;
+  cudaExtent field_extent = make_cudaExtent(nx * sizeof(coord3d_d), ny, nz);
+  cudaMalloc3D(&field_d, field_extent);
+
+  cudaMemcpy3DParms memCopyParameters = {0};
+  memCopyParameters.srcPtr = make_cudaPitchedPtr(field, nx * sizeof(coord3d_d), ny, nz);
+  memCopyParameters.dstPtr = field_d;
+  memCopyParameters.extent = field_extent;
+  memCopyParameters.kind = cudaMemcpyHostToDevice;
+
+  cudaMemcpy3DAsync(&memCopyParameters, 0);
+  // printf("nx, ny, nz %lu, %lu, %lu\n", field_d.pitch, field_d.xsize, field_d.ysize);
 
   // alloc
-  cudaMalloc((void**)&field_d, nx * ny * nz * sizeof(coord3d_d));
   cudaMalloc((void**)&start_points_d, n_points * sizeof(coord3d_d));
   cudaMalloc((void**)&trajectories_d, n_points * max_points_traj * sizeof(coord3d_d));
   cudaMalloc((void**)&res_d, n_points * sizeof(Tropicity));
 
   // copy to device
-  cudaMemcpy(field_d, field, nx * ny * nz * sizeof(coord3d_d), cudaMemcpyHostToDevice);
   cudaMemcpy(start_points_d, start_points, n_points * sizeof(coord3d_d), cudaMemcpyHostToDevice);
 
   int block_size = 512;
@@ -273,7 +278,7 @@ std::vector<Tropicity> classify_points_cudax(const double* field_a, const int64_
   cudaMemcpy(res.data(), res_d, n_points * sizeof(Tropicity), cudaMemcpyDeviceToHost);
 
   // dealloc
-  cudaFree(field_d);
+  cudaFree(field_d.ptr);
   cudaFree(start_points_d);
   cudaFree(trajectories_d);
   cudaFree(res_d);
@@ -281,3 +286,32 @@ std::vector<Tropicity> classify_points_cudax(const double* field_a, const int64_
   delete[] start_points;
   return res;
 }
+
+
+// from cuda documentation:
+//
+// // Host code
+// int width = 64, height = 64, depth = 64;
+// cudaExtent extent = make_cudaExtent(width * sizeof(float),
+//                                     height, depth);
+// cudaPitchedPtr devPitchedPtr;
+// cudaMalloc3D(&devPitchedPtr, extent);
+// MyKernel<<<100, 512>>>(devPitchedPtr, width, height, depth);
+//
+// // Device code
+// __global__ void MyKernel(cudaPitchedPtr devPitchedPtr,
+//                          int width, int height, int depth)
+// {
+//     char* devPtr = devPitchedPtr.ptr;
+//     size_t pitch = devPitchedPtr.pitch;
+//     size_t slicePitch = pitch * height;
+//     for (int z = 0; z < depth; ++z) {
+//         char* slice = devPtr + z * slicePitch;
+//         for (int y = 0; y < height; ++y) {
+//             float* row = (float*)(slice + y * pitch);
+//             for (int x = 0; x < width; ++x) {
+//                 float element = row[x];
+//             }
+//         }
+//     }
+// }

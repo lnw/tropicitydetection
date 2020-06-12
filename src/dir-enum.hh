@@ -24,6 +24,7 @@ inline Direction to_direction(int i) {
       return Direction::pos_z;
     case 5:
       return Direction::neg_z;
+    default:
+      assert(false);
   }
-  assert(false);
 }
