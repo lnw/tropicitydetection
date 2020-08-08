@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.12)
 project(tropicity)
 enable_language(CXX)
 
@@ -29,36 +29,19 @@ endif()
 
 
 if(ENABLE_CUDA)
-    find_package(CUDA REQUIRED)
-    if(CUDA_FOUND)
-        add_definitions(-DHAVE_CUDA)
-        include_directories(${CUDA_INCLUDE_DIRS})
-        message("Cuda include directories ${CUDA_INCLUDE_DIRS}")
-        message("Cuda libraries ${CUDA_CUBLAS_LIBRARIES} ${CUDA_LIBRARIES}")
-        set(LIBS ${LIBS} ${CUDA_CUBLAS_LIBRARIES} ${CUDA_LIBRARIES})
-        set(CUDA_NVCC_ARCH "52;60") # build for compute capabilties 5.2 and 6.0
-        foreach (ARCH ${CUDA_NVCC_ARCH})
-            set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}
-                        "-gencode arch=compute_${ARCH},code=sm_${ARCH}"
-                        )
-        endforeach()
-
-        set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}
-                        "--expt-relaxed-constexpr -I${CMAKE_INSTALL_PREFIX}/include/"
-           )
-        if(CMAKE_BUILD_TYPE EQUAL DEBUG)
-          set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} "-lineinfo ")
-        endif()
-
-        message("cuda nvcc flags ${CUDA_NVCC_FLAGS}")
-    endif()
+  enable_language(CUDA)
+  add_definitions(-DHAVE_CUDA)
+  include_directories(${CUDA_INCLUDE_DIRS})
+  message("Cuda include directories ${CUDA_INCLUDE_DIRS}")
+  message("Cuda libraries ${CUDA_LIBRARIES}")
+  set(LIBS ${LIBS} ${CUDA_LIBRARIES})
 endif ()
 
 
 set(CMAKE_CXX_FLAGS "-fPIC")
 if(ENABLE_OMP)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
-    add_definitions(-DHAVE_OMP)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+  add_definitions(-DHAVE_OMP)
 endif()
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -Wall -Wshadow -Wunused")

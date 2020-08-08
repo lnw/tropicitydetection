@@ -1,19 +1,25 @@
 
 set(SOURCES
-    geometry3.cc
-    cube.cc
-    trajectory.cc
-   )
+  cube.cc
+  cube.cu
+  geometry3.cc
+  gpu-info.cu
+  trajectory.cc
+)
 
-if(CUDA_FOUND)
-    set(SOURCES ${SOURCES}
-        gpu-info.cu
-        cube.cu
-       )
-    cuda_add_library(trop STATIC ${SOURCES})
-    set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS})
-else()
-    add_library(trop STATIC ${SOURCES})
+add_library(trop SHARED ${SOURCES})
+
+if(ENABLE_CUDA)
+  set(CUDA_NVCC_ARCH "52;60") # build for compute capabilties 5.2 and 6.0
+  foreach (ARCH ${CUDA_NVCC_ARCH})
+    target_compile_options(trop PRIVATE $<$<COMPILE_LANGUAGE:CUDA>: "SHELL:-gencode arch=compute_${ARCH},code=sm_${ARCH}" >)
+  endforeach()
+
+  target_compile_options(trop PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>) 
+
+  if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+    target_compile_options(trop PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-lineinfo>) 
+  endif()
 endif()
 
 
