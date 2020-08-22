@@ -456,7 +456,7 @@ cout << "e " << cudaGetLastError() << endl;
   cudaMemcpy(start_points_d, start_points, n_points * sizeof(coord3d_d), cudaMemcpyHostToDevice);
 cout << "e " << cudaGetLastError() << endl;
 
-  int block_size = 512;
+  int block_size = 256;
   int grid_size = n_points / block_size + (n_points % block_size != 0);
   std::cout << "points / gridsize / blocksize: " << n_points << ", " << grid_size << ", " << block_size << std::endl;
   classify_points_kernel_v1<<<grid_size, block_size>>>(start_points_d, n_points,
@@ -480,7 +480,7 @@ cout << "e " << cudaGetLastError() << endl;
 }
 
 
-std::vector<Tropicity> classify_points_cudax_v2(const double* field_x_a, const double* field_y_a, const double* field_z_a, 
+std::vector<Tropicity> classify_points_cudax_v2(double* field_x_a, double* field_y_a, double* field_z_a, 
                                                 const int64_t nx, const int64_t ny, const int64_t nz, double* origin_a, double* spacing_a,
                                                 const double* start_points_a, int64_t n_points, Direction bfielddir) {
   std::cout << __PRETTY_FUNCTION__ << std::endl;
@@ -493,16 +493,12 @@ std::vector<Tropicity> classify_points_cudax_v2(const double* field_x_a, const d
   int64_t max_points_traj = 10000;
 
   std::vector<Tropicity> res(n_points);
-  // coord3d_d* field = new coord3d_d[nx * ny * nz];
   coord3d_d* start_points = new coord3d_d[n_points];
 
   coord3d_d* start_points_d;
   Tropicity* res_d;
   coord3d_d* trajectories_d;
 
-  // for (int64_t i = 0; i < nx * ny * nz; i++)
-  //   for (int64_t j = 0; j < 3; j++)
-  //     field[i][j] = field_a[3 * i + j];
   for (int64_t i = 0; i < n_points; i++)
     for (int64_t j = 0; j < 3; j++)
       start_points[i][j] = start_points_a[3 * i + j];
@@ -510,32 +506,41 @@ std::vector<Tropicity> classify_points_cudax_v2(const double* field_x_a, const d
   cudaArray_t field_x_d, field_y_d, field_z_d;
   // cudaChannelFormatDesc desc = cudaCreateChannelDesc<double>();
   cudaChannelFormatDesc desc = cudaCreateChannelDesc(32, 32, 0, 0, cudaChannelFormatKindSigned);  // we pretend to store int2 instead of double
-  cudaExtent field_extent = make_cudaExtent(nx * sizeof(double), ny, nz);
+  cudaExtent field_extent = make_cudaExtent(nx, ny, nz);
   cudaMalloc3DArray(&field_x_d, &desc, field_extent);
+cout << "e " << cudaGetErrorName(cudaGetLastError()) << endl;
   cudaMalloc3DArray(&field_y_d, &desc, field_extent);
+cout << "e " << cudaGetErrorName(cudaGetLastError()) << endl;
   cudaMalloc3DArray(&field_z_d, &desc, field_extent);
+cout << "e " << cudaGetErrorName(cudaGetLastError()) << endl;
 
   cudaMemcpy3DParms memCopyParametersX = {0};
-  memCopyParametersX.srcPtr = make_cudaPitchedPtr(&field_x_a, nx * sizeof(double), ny, nz);
+  memCopyParametersX.srcPtr = make_cudaPitchedPtr(field_x_a, nx * sizeof(double), nx, ny);
   memCopyParametersX.dstArray = field_x_d;
   memCopyParametersX.extent = field_extent;
   memCopyParametersX.kind = cudaMemcpyHostToDevice;
+cout << "e " << cudaGetErrorName(cudaGetLastError()) << endl;
 
   cudaMemcpy3DParms memCopyParametersY = {0};
-  memCopyParametersY.srcPtr = make_cudaPitchedPtr(&field_y_a, nx * sizeof(double), ny, nz);
+  memCopyParametersY.srcPtr = make_cudaPitchedPtr(field_y_a, nx * sizeof(double), nx, ny);
   memCopyParametersY.dstArray = field_y_d;
   memCopyParametersY.extent = field_extent;
   memCopyParametersY.kind = cudaMemcpyHostToDevice;
+cout << "e " << cudaGetErrorName(cudaGetLastError()) << endl;
 
   cudaMemcpy3DParms memCopyParametersZ = {0};
-  memCopyParametersZ.srcPtr = make_cudaPitchedPtr(&field_z_a, nx * sizeof(double), ny, nz);
+  memCopyParametersZ.srcPtr = make_cudaPitchedPtr(field_z_a, nx * sizeof(double), nx, ny);
   memCopyParametersZ.dstArray = field_z_d;
   memCopyParametersZ.extent = field_extent;
   memCopyParametersZ.kind = cudaMemcpyHostToDevice;
+cout << "e " << cudaGetErrorName(cudaGetLastError()) << endl;
 
   cudaMemcpy3DAsync(&memCopyParametersX, 0);
+cout << "e " << cudaGetErrorName(cudaGetLastError()) << endl;
   cudaMemcpy3DAsync(&memCopyParametersY, 0);
+cout << "e " << cudaGetErrorName(cudaGetLastError()) << endl;
   cudaMemcpy3DAsync(&memCopyParametersZ, 0);
+cout << "e " << cudaGetErrorName(cudaGetLastError()) << endl;
   // printf("nx, ny, nz %lu, %lu, %lu\n", field_d.pitch, field_d.xsize, field_d.ysize);
 
   // prepare textures
@@ -563,29 +568,37 @@ std::vector<Tropicity> classify_points_cudax_v2(const double* field_x_a, const d
 
   cudaTextureObject_t fieldXTexture = 0, fieldYTexture = 0, fieldZTexture = 0;
   cudaCreateTextureObject(&fieldXTexture, &fieldXResDesc, &fieldTexDesc, nullptr);
+cout << "e " << cudaGetErrorName(cudaGetLastError()) << endl;
   cudaCreateTextureObject(&fieldYTexture, &fieldYResDesc, &fieldTexDesc, nullptr);
+cout << "e " << cudaGetErrorName(cudaGetLastError()) << endl;
   cudaCreateTextureObject(&fieldZTexture, &fieldZResDesc, &fieldTexDesc, nullptr);
+cout << "e " << cudaGetErrorName(cudaGetLastError()) << endl;
 
 
   // alloc
   cudaMalloc((void**)&start_points_d, n_points * sizeof(coord3d_d));
+cout << "e " << cudaGetErrorName(cudaGetLastError()) << endl;
   cudaMalloc((void**)&trajectories_d, n_points * max_points_traj * sizeof(coord3d_d));
+cout << "e " << cudaGetErrorName(cudaGetLastError()) << endl;
   cudaMalloc((void**)&res_d, n_points * sizeof(Tropicity));
+cout << "e " << cudaGetErrorName(cudaGetLastError()) << endl;
 
   // copy to device
   cudaMemcpy(start_points_d, start_points, n_points * sizeof(coord3d_d), cudaMemcpyHostToDevice);
-cout << "e" << cudaGetLastError() << endl;
+cout << "e " << cudaGetErrorName(cudaGetLastError()) << endl;
 
-  int block_size = 512;
+  int block_size = 256;
   int grid_size = n_points / block_size + (n_points % block_size != 0);
   std::cout << "points / gridsize / blocksize: " << n_points << ", " << grid_size << ", " << block_size << std::endl;
   classify_points_kernel_v2<<<grid_size, block_size>>>(start_points_d, n_points,
                                                        fieldXTexture, fieldYTexture, fieldZTexture, nx, ny, nz,
                                                        trajectories_d, step_length, max_points_traj,
                                                        bfielddir, res_d);
+cout << "e " << cudaGetErrorName(cudaGetLastError()) << endl;
 
   // copy from device
   cudaMemcpy(res.data(), res_d, n_points * sizeof(Tropicity), cudaMemcpyDeviceToHost);
+cout << "e " << cudaGetErrorName(cudaGetLastError()) << endl;
 
   cudaDestroyTextureObject(fieldXTexture);
   cudaDestroyTextureObject(fieldYTexture);

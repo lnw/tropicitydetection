@@ -14,7 +14,7 @@
 
 std::vector<Tropicity> classify_points_cudax_v1(const double* field, int64_t nx, int64_t ny, int64_t nz,
                                                 double* origin, double* spacing, const double* coords, int64_t n_points, Direction bfielddir);
-std::vector<Tropicity> classify_points_cudax_v2(const double* field_x, const double* field_y, const double* field_z, int64_t nx, int64_t ny, int64_t nz,
+std::vector<Tropicity> classify_points_cudax_v2(double* field_x, double* field_y, double* field_z, int64_t nx, int64_t ny, int64_t nz,
                                                 double* origin, double* spacing, const double* coords, int64_t n_points, Direction bfielddir);
 
 
