@@ -144,7 +144,7 @@ int main(int argc, char** argv) {
     Trajectory traj(point, std::get<1>(optvect), 0.01);
     traj.complete(cube);
     traj.write2mathematicalist("traj.txt");
-    cout << "\nclassification: " << as_integer(traj.classify(Direction::pos_z)) << "\n";
+    cout << "\nclassification: " << as_underlying(traj.classify(Direction::pos_z)) << "\n";
     return 0;
   }
   else {

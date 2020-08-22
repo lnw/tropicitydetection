@@ -313,7 +313,7 @@ void Cube::writetropplane(string filename, Plane<Tropicity> tropicities) const {
   outputfile.open(filename);
   outputfile << "trop = {\n";
   for (size_t i = 0; i < tropicities.size(); i++) {
-    outputfile << as_integer(tropicities[i]);
+    outputfile << as_underlying(tropicities[i]);
     if (i < tropicities.size() - 1) {
       outputfile << ",";
     }

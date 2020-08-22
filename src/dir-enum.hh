@@ -27,4 +27,5 @@ inline Direction to_direction(int i) {
     default:
       assert(false);
   }
+  __builtin_unreachable();
 }
