@@ -45,9 +45,11 @@ python splitgrid.py --input QZVPPDh2te-m06-2x.vti --bfielddir 5 --grid grid4h2te
 ## cuda support
 
 The cuda support passes all tests, but is tested only with a device with
-compute capability 5.2.  The implementation is, however, so naive that it
-likely also works with newer or older devices.  In order to compile for other
-compute capabilities, the cmake-file needs to be adapted.
+compute capability 5.2.  There are three different implementations of the
+trajectory completion, two using a double precision vector field and one using
+single precision for the vector field (but still doubles for all other floating
+point quantities).  In order to compile for other compute capabilities, the
+cmake-file needs to be adapted.
 
 
 ## installation

@@ -132,7 +132,7 @@ __device__ bool getvector_v2(const coord3d_d& pos,
 
 
 // trilinear interpolation
-__device__ inline bool getvector_v3(const coord3d_d& pos, cudaTextureObject_t field_d, 
+__device__ inline bool getvector_v3(const coord3d_d& pos, cudaTextureObject_t field_d,
                                     const int64_t nx, const int64_t ny, const int64_t nz, coord3d_d& res_vec) {
   // int indx = threadIdx.x + blockIdx.x * blockDim.x;
   // if (indx < 2) {
@@ -325,7 +325,7 @@ __device__ void complete_trajectory_v2(const cudaTextureObject_t field_x, const 
   // if we get to a point that is less than return_ratio of the longest distance in the trajectory
   while ((positions[index] - positions[0]).norm() > return_ratio * dist2farthest) {
     if (!extend_rungekutta_v2(field_x, field_y, field_z, nx, ny, nz,
-                           positions[index], step_length, positions[index + 1])) {
+                              positions[index], step_length, positions[index + 1])) {
       out_of_bounds = true;
       // printf("%d: %d oob\n", indx, index);
       return;
@@ -463,7 +463,7 @@ __global__ void classify_points_kernel_v1(coord3d_d* __restrict__ points, int64_
 
 
 __global__ void classify_points_kernel_v2(coord3d_d* __restrict__ points, int64_t n_points,
-                                          cudaTextureObject_t field_x, cudaTextureObject_t field_y, cudaTextureObject_t field_z, 
+                                          cudaTextureObject_t field_x, cudaTextureObject_t field_y, cudaTextureObject_t field_z,
                                           const int64_t nx, const int64_t ny, const int64_t nz,
                                           coord3d_d* __restrict__ trajectories_d, float step_length, int64_t max_points_traj,
                                           Direction bfielddir, Tropicity* __restrict__ tropicities_d) {
@@ -502,7 +502,9 @@ __global__ void classify_points_kernel_v3(coord3d_d* __restrict__ points, int64_
   const int32_t indx = threadIdx.x + blockIdx.x * blockDim.x;
   // if (indx < 2) printf("hello from the gpu: %d\n", indx);
 
-  if (indx > n_points - 1) { return; }
+  if (indx > n_points - 1) {
+    return;
+  }
 
   coord3d_d vec(0, 0, 0);
   // if (indx < 2) printf("pos %d %f/%f/%f\n", indx, points[indx][0], points[indx][1], points[indx][2]);
@@ -580,7 +582,7 @@ std::vector<Tropicity> classify_points_cudax_v1(const double* field_a, const int
                                                        trajectories_d, step_length, max_points_traj,
                                                        bfielddir, res_d);
   // cout << "e " << cudaGetLastError() << endl;
-  
+
   // copy from device
   cudaMemcpy(res.data(), res_d, n_points * sizeof(Tropicity), cudaMemcpyDeviceToHost);
 
@@ -595,7 +597,7 @@ std::vector<Tropicity> classify_points_cudax_v1(const double* field_a, const int
 }
 
 
-std::vector<Tropicity> classify_points_cudax_v2(double* field_x_a, double* field_y_a, double* field_z_a, 
+std::vector<Tropicity> classify_points_cudax_v2(double* field_x_a, double* field_y_a, double* field_z_a,
                                                 const int64_t nx, const int64_t ny, const int64_t nz, double* origin_a, double* spacing_a,
                                                 const double* start_points_a, int64_t n_points, Direction bfielddir) {
   // std::cout << __PRETTY_FUNCTION__ << std::endl;
@@ -620,7 +622,7 @@ std::vector<Tropicity> classify_points_cudax_v2(double* field_x_a, double* field
 
   cudaArray_t field_x_d, field_y_d, field_z_d;
   // cudaChannelFormatDesc desc = cudaCreateChannelDesc<double>();
-  cudaChannelFormatDesc desc = cudaCreateChannelDesc(32, 32, 0, 0, cudaChannelFormatKindSigned);  // we pretend to store int2 instead of double
+  cudaChannelFormatDesc desc = cudaCreateChannelDesc(32, 32, 0, 0, cudaChannelFormatKindSigned); // we pretend to store int2 instead of double
   cudaExtent field_extent = make_cudaExtent(nx, ny, nz);
   cudaMalloc3DArray(&field_x_d, &desc, field_extent);
   cudaMalloc3DArray(&field_y_d, &desc, field_extent);
@@ -669,9 +671,9 @@ std::vector<Tropicity> classify_points_cudax_v2(double* field_x_a, double* field
 
   struct cudaTextureDesc fieldTexDesc;
   memset(&fieldTexDesc, 0, sizeof(fieldTexDesc));
-  fieldTexDesc.addressMode[0] = cudaAddressModeBorder;  // alternatively: wrap, clamp, mirror
-  fieldTexDesc.addressMode[1] = cudaAddressModeBorder;  // alternatively: wrap, clamp, mirror
-  fieldTexDesc.addressMode[2] = cudaAddressModeBorder;  // alternatively: wrap, clamp, mirror
+  fieldTexDesc.addressMode[0] = cudaAddressModeBorder; // alternatively: wrap, clamp, mirror
+  fieldTexDesc.addressMode[1] = cudaAddressModeBorder; // alternatively: wrap, clamp, mirror
+  fieldTexDesc.addressMode[2] = cudaAddressModeBorder; // alternatively: wrap, clamp, mirror
   fieldTexDesc.filterMode = cudaFilterModePoint;       // ie, interpolate linearly
   fieldTexDesc.readMode = cudaReadModeElementType;
   fieldTexDesc.normalizedCoords = 0;
@@ -723,7 +725,7 @@ std::vector<Tropicity> classify_points_cudax_v2(double* field_x_a, double* field
 }
 
 
-std::vector<Tropicity> classify_points_cudax_v3(float* field_x_a, float* field_y_a, float* field_z_a, 
+std::vector<Tropicity> classify_points_cudax_v3(float* field_x_a, float* field_y_a, float* field_z_a,
                                                 const int64_t nx, const int64_t ny, const int64_t nz, double* origin_a, double* spacing_a,
                                                 const double* start_points_a, int64_t n_points, Direction bfielddir) {
   // std::cout << __PRETTY_FUNCTION__ << std::endl;
@@ -746,15 +748,15 @@ std::vector<Tropicity> classify_points_cudax_v3(float* field_x_a, float* field_y
     for (int64_t j = 0; j < 3; j++)
       start_points[i][j] = start_points_a[3 * i + j];
 
-  float4* field_float4 = new float4[nx*ny*nz];
-  for (int64_t i = 0; i < nx*ny*nz; i++) {
+  float4* field_float4 = new float4[nx * ny * nz];
+  for (int64_t i = 0; i < nx * ny * nz; i++) {
     field_float4[i].x = field_x_a[i];
     field_float4[i].y = field_y_a[i];
     field_float4[i].z = field_z_a[i];
   }
 
   cudaArray_t field_d;
-   cudaChannelFormatDesc desc = cudaCreateChannelDesc<float4>();
+  cudaChannelFormatDesc desc = cudaCreateChannelDesc<float4>();
   // cudaChannelFormatDesc desc = cudaCreateChannelDesc(32, 32, 32, 0, cudaChannelFormatKindFloat);
   cudaExtent field_extent = make_cudaExtent(nx, ny, nz);
   cudaMalloc3DArray(&field_d, &desc, field_extent);
@@ -779,10 +781,10 @@ std::vector<Tropicity> classify_points_cudax_v3(float* field_x_a, float* field_y
 
   struct cudaTextureDesc fieldTexDesc;
   memset(&fieldTexDesc, 0, sizeof(fieldTexDesc));
-  fieldTexDesc.addressMode[0] = cudaAddressModeBorder;  // alternatively: wrap, clamp, mirror
-  fieldTexDesc.addressMode[1] = cudaAddressModeBorder;  // alternatively: wrap, clamp, mirror
-  fieldTexDesc.addressMode[2] = cudaAddressModeBorder;  // alternatively: wrap, clamp, mirror
-  fieldTexDesc.filterMode = cudaFilterModeLinear;       // ie, interpolate linearly
+  fieldTexDesc.addressMode[0] = cudaAddressModeBorder; // alternatively: wrap, clamp, mirror
+  fieldTexDesc.addressMode[1] = cudaAddressModeBorder; // alternatively: wrap, clamp, mirror
+  fieldTexDesc.addressMode[2] = cudaAddressModeBorder; // alternatively: wrap, clamp, mirror
+  fieldTexDesc.filterMode = cudaFilterModeLinear;      // ie, interpolate linearly
   fieldTexDesc.readMode = cudaReadModeElementType;
   fieldTexDesc.normalizedCoords = 0;
 
@@ -825,4 +827,3 @@ std::vector<Tropicity> classify_points_cudax_v3(float* field_x_a, float* field_y
   delete[] start_points;
   return res;
 }
-
