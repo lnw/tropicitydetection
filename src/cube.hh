@@ -16,6 +16,8 @@ std::vector<Tropicity> classify_points_cudax_v1(const double* field, int64_t nx,
                                                 double* origin, double* spacing, const double* coords, int64_t n_points, Direction bfielddir);
 std::vector<Tropicity> classify_points_cudax_v2(double* field_x, double* field_y, double* field_z, int64_t nx, int64_t ny, int64_t nz,
                                                 double* origin, double* spacing, const double* coords, int64_t n_points, Direction bfielddir);
+std::vector<Tropicity> classify_points_cudax_v3(float* field_x, float* field_y, float* field_z, int64_t nx, int64_t ny, int64_t nz,
+                                                double* origin, double* spacing, const double* coords, int64_t n_points, Direction bfielddir);
 
 
 class Cube {
@@ -123,15 +125,55 @@ public:
     return res;
   }
 
+
+  std::vector<Tropicity> classify_points_cuda_v3(const std::vector<coord3d>& coords, Direction bfielddir) const {
+    // x, y, and z coordinates of the vector field
+    float* field_x_a = new float[field.size()];
+    float* field_y_a = new float[field.size()];
+    float* field_z_a = new float[field.size()];
+    for (size_t i = 0; i < field.size(); i++) {
+      field_x_a[i] = field[i][0];
+      field_y_a[i] = field[i][1];
+      field_z_a[i] = field[i][2];
+    }
+    double* origin_a = new double[3];
+    for (int i = 0; i < 3; i++)
+      origin_a[i] = origin[i];
+    double* spacing_a = new double[3];
+    for (int i = 0; i < 3; i++)
+      spacing_a[i] = spacing[i];
+    double* coords_a = new double[3 * coords.size()];
+    for (size_t i = 0; i < coords.size(); i++) {
+      coords_a[3 * i + 0] = coords[i][0];
+      coords_a[3 * i + 1] = coords[i][1];
+      coords_a[3 * i + 2] = coords[i][2];
+    }
+    // std::cout << spacing[0] << ", " << spacing[1] << ", " << spacing[2] <<std::endl;
+    // std::cout << spacing_a[0] << ", " << spacing_a[1] << ", " << spacing_a[2] <<std::endl;
+    std::vector<Tropicity> res = classify_points_cudax_v3(field_x_a, field_y_a, field_z_a, n_x, n_y, n_z, origin_a, spacing_a, coords_a, coords.size(), bfielddir);
+    delete[] field_x_a;
+    delete[] field_y_a;
+    delete[] field_z_a;
+    delete[] origin_a;
+    delete[] spacing_a;
+    delete[] coords_a;
+
+    // std::cout << as_underlying(res[0]) << ", " << as_underlying(res[1]) << std::endl;
+    return res;
+  }
+
+
   std::vector<Tropicity> classify_points_cpu(const std::vector<coord3d>& coords, Direction bfielddir) const;
   std::vector<Tropicity> classify_points(const std::vector<coord3d>& coords, Direction bfielddir) const {
 #if HAVE_CUDA
-#if 1
+#if 0
     cout << "manual interpolation on pitched_ptr of coord3d_d" << endl;
     return classify_points_cuda_v1(coords, bfielddir);
 #else
-    cout << "manual interpolation on 3*texture of int2/double" << endl;
-    return classify_points_cuda_v2(coords, bfielddir);
+    // cout << "manual interpolation on 3*texture of int2/double" << endl;
+    // return classify_points_cuda_v2(coords, bfielddir);
+    cout << "cuda linear-interpolation on float3 (via float4)" << endl;
+    return classify_points_cuda_v3(coords, bfielddir);
 #endif
 #else
     return classify_points_cpu(coords, bfielddir);
